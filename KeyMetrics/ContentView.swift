@@ -7,34 +7,36 @@
 
 import SwiftUI
 import SwiftData
+import Charts
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    @EnvironmentObject var keyboardMonitor: KeyboardMonitor
+    @State private var selectedTab = 0
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        TabView(selection: $selectedTab) {
+            DashboardView()
+                .tabItem {
+                    Label("Dashboard", systemImage: "chart.bar.fill")
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .tag(0)
+            
+            KeyFrequencyView()
+                .tabItem {
+                    Label("Key Stats", systemImage: "keyboard")
                 }
-            }
-        } detail: {
-            Text("Select an item")
+                .tag(1)
+            
+            HistoryView()
+                .tabItem {
+                    Label("History", systemImage: "clock")
+                }
+                .tag(2)
         }
+        .padding()
+        .frame(minWidth: 800, minHeight: 600)
     }
 
     private func addItem() {
