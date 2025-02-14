@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- 已有的其他配置 -->
+    <key>NSAppleEventsUsageDescription</key>
+    <string>KeyMetrics需要访问键盘输入以统计按键次数。</string>
+    <key>Privacy - Accessibility Usage Description</key>
+    <string>KeyMetrics需要辅助功能权限来统计键盘输入。</string>
+</dict>
+</plist> 

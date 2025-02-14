@@ -16,24 +16,37 @@ struct ContentView: View {
     @State private var selectedTab = 0
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            DashboardView()
-                .tabItem {
-                    Label("Dashboard", systemImage: "chart.bar.fill")
+        VStack {
+            if !keyboardMonitor.isMonitoring {
+                VStack {
+                    Text("需要辅助功能权限才能统计键盘输入")
+                        .foregroundColor(.red)
+                    Button("授予权限") {
+                        keyboardMonitor.startMonitoring()
+                    }
                 }
-                .tag(0)
+                .padding()
+            }
             
-            KeyFrequencyView()
-                .tabItem {
-                    Label("Key Stats", systemImage: "keyboard")
-                }
-                .tag(1)
-            
-            HistoryView()
-                .tabItem {
-                    Label("History", systemImage: "clock")
-                }
-                .tag(2)
+            TabView(selection: $selectedTab) {
+                DashboardView()
+                    .tabItem {
+                        Label("Dashboard", systemImage: "chart.bar.fill")
+                    }
+                    .tag(0)
+                
+                KeyFrequencyView()
+                    .tabItem {
+                        Label("Key Stats", systemImage: "keyboard")
+                    }
+                    .tag(1)
+                
+                HistoryView()
+                    .tabItem {
+                        Label("History", systemImage: "clock")
+                    }
+                    .tag(2)
+            }
         }
         .padding()
         .frame(minWidth: 800, minHeight: 600)
