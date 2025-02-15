@@ -31,21 +31,33 @@ struct ContentView: View {
             TabView(selection: $selectedTab) {
                 DashboardView()
                     .tabItem {
-                        Label("Dashboard", systemImage: "chart.bar.fill")
+                        Label("仪表盘", systemImage: "chart.bar.fill")
                     }
                     .tag(0)
                 
                 KeyFrequencyView()
                     .tabItem {
-                        Label("Key Stats", systemImage: "keyboard")
+                        Label("按键分析", systemImage: "keyboard")
                     }
                     .tag(1)
                 
                 HistoryView()
                     .tabItem {
-                        Label("History", systemImage: "clock")
+                        Label("历史记录", systemImage: "clock")
                     }
                     .tag(2)
+                
+                SettingsView()
+                    .tabItem {
+                        Label("设置", systemImage: "gear")
+                    }
+                    .tag(3)
+                
+                AboutView()
+                    .tabItem {
+                        Label("关于我们", systemImage: "info.circle")
+                    }
+                    .tag(4)
             }
         }
         .padding()
