@@ -73,14 +73,7 @@ struct DashboardView: View {
     }
     
     private func getCurrentTypingSpeed() -> Double {
-        let now = Date()
-        let oneMinuteAgo = now.addingTimeInterval(-60)
-        
-        let recentKeyStrokes = keyboardMonitor.keyStats.hourlyStats.filter { timestamp, _ in
-            timestamp >= oneMinuteAgo && timestamp <= now
-        }.values.reduce(0, +)
-        
-        return Double(recentKeyStrokes)
+        return Double(keyboardMonitor.currentSpeed)
     }
     
     private func getHistoricalAccuracy() -> Double {
@@ -283,17 +276,17 @@ struct KeyboardHeatMapView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let keyStats: KeyStats
     
-    // 完整键盘布局数据
+    // 完整键盘布局数据，与 KeyboardMonitor 保持一致
     private let keyboardLayout: [[KeyData]] = [
         // 功能键行
         [
             KeyData(key: "esc", code: 53), 
             KeyData(key: "F1", code: 122), KeyData(key: "F2", code: 120), 
-            KeyData(key: "F3", code: 99), KeyData(key: "F4", code: 118),
-            KeyData(key: "F5", code: 96), KeyData(key: "F6", code: 97),
-            KeyData(key: "F7", code: 98), KeyData(key: "F8", code: 100),
-            KeyData(key: "F9", code: 101), KeyData(key: "F10", code: 109),
-            KeyData(key: "F11", code: 103), KeyData(key: "F12", code: 111)
+            KeyData(key: "F3", code: 160), KeyData(key: "F4", code: 177),
+            KeyData(key: "F5", code: 176), KeyData(key: "F6", code: 178),
+            KeyData(key: "F7", code: 130), KeyData(key: "F8", code: 131),
+            KeyData(key: "F9", code: 132), KeyData(key: "F10", code: 133),
+            KeyData(key: "F11", code: 134), KeyData(key: "F12", code: 135)
         ],
         // 数字键行
         [
@@ -327,23 +320,28 @@ struct KeyboardHeatMapView: View {
             KeyData(key: "L", code: 37), KeyData(key: ";", code: 41),
             KeyData(key: "'", code: 39), KeyData(key: "↩", code: 36)
         ],
-        // 第三行字母
+        // 第三行字母，修正 shift 键码
         [
-            KeyData(key: "⇧", code: 56),
+            KeyData(key: "⇧", code: 56, id: "shift_left"),
             KeyData(key: "Z", code: 6), KeyData(key: "X", code: 7),
             KeyData(key: "C", code: 8), KeyData(key: "V", code: 9),
             KeyData(key: "B", code: 11), KeyData(key: "N", code: 45),
             KeyData(key: "M", code: 46), KeyData(key: ",", code: 43),
             KeyData(key: ".", code: 47), KeyData(key: "/", code: 44),
-            KeyData(key: "⇧", code: 56)
+            KeyData(key: "⇧", code: 60, id: "shift_right")  // 修正右 shift 键码
         ],
-        // 底部功能键行
+        // 底部功能键行，修正 fn 和其他修饰键的键码
         [
-            KeyData(key: "fn", code: 63), KeyData(key: "⌃", code: 59),
-            KeyData(key: "⌥", code: 58), KeyData(key: "⌘", code: 55),
-            KeyData(key: "space", code: 49), KeyData(key: "⌘", code: 54),
-            KeyData(key: "⌥", code: 61), KeyData(key: "←", code: 123),
-            KeyData(key: "↑", code: 126), KeyData(key: "↓", code: 125),
+            KeyData(key: "fn", code: 179),
+            KeyData(key: "⌃", code: 59),
+            KeyData(key: "⌥", code: 58, id: "option_left"),
+            KeyData(key: "⌘", code: 55, id: "command_left"),
+            KeyData(key: "space", code: 49),
+            KeyData(key: "⌘", code: 54, id: "command_right"),
+            KeyData(key: "⌥", code: 61, id: "option_right"),
+            KeyData(key: "←", code: 123),
+            KeyData(key: "↑", code: 126),
+            KeyData(key: "↓", code: 125),
             KeyData(key: "→", code: 124)
         ]
     ]
@@ -408,7 +406,13 @@ struct KeyboardHeatMapView: View {
 struct KeyData: Identifiable {
     let key: String
     let code: Int
-    var id: String { key }
+    let id: String
+    
+    init(key: String, code: Int, id: String? = nil) {
+        self.key = key
+        self.code = code
+        self.id = id ?? key // 如果没有提供 id，使用 key 作为默认值
+    }
 }
 
 // 单个按键单元格视图
