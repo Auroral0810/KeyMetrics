@@ -4,14 +4,6 @@ import Charts
 struct DashboardView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
-    @State private var selectedTimeRange: TimeRange = .day
-    
-    enum TimeRange: String, CaseIterable {
-        case day = "24小时"
-        case week = "本周"
-        case month = "本月"
-        case year = "全年"
-    }
     
     var body: some View {
         ScrollView {
@@ -19,7 +11,7 @@ struct DashboardView: View {
                 // 顶部统计卡片
                 HStack(spacing: 20) {
                     StatCardView(
-                        title: "总按键次数",
+                        title: "累计按键",
                         value: "\(keyboardMonitor.keyStats.totalCount)",
                         icon: "keyboard",
                         color: ThemeManager.ThemeColors.chartColors[0]
@@ -31,75 +23,36 @@ struct DashboardView: View {
                         icon: "clock",
                         color: ThemeManager.ThemeColors.chartColors[1]
                     )
+                }
+                
+                // 中间区域：速度计和气泡区
+                HStack(spacing: 20) {
+                    // 实时速度计 - 调整大小
+                    SpeedMeterView(currentSpeed: getCurrentTypingSpeed())
+                        .frame(width: 160, height: 160)
                     
-                    StatCardView(
-                        title: "平均每小时",
-                        value: "\(getAverageHourlyCount())",
-                        icon: "chart.bar",
+                    // 按键气泡动画区域 - 填满剩余空间
+                    KeyBubbleView(latestKeyStroke: keyboardMonitor.latestKeyStroke)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 160)
+                        .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
+                        .cornerRadius(16)
+                }
+                
+                // 准确率统计
+                HStack(spacing: 20) {
+                    AccuracyCardView(
+                        title: "历史准确率",
+                        accuracy: getHistoricalAccuracy(),
                         color: ThemeManager.ThemeColors.chartColors[2]
                     )
-                }
-                
-                // 实时速度计
-                SpeedMeterView(currentSpeed: getCurrentTypingSpeed())
-                
-                // 活动热力图
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("活动热力图")
-                            .font(.headline)
-                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                        Spacer()
-                        Picker("时间范围", selection: $selectedTimeRange) {
-                            ForEach(TimeRange.allCases, id: \.self) { range in
-                                Text(range.rawValue).tag(range)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                    }
                     
-                    HeatMapView(data: getHeatMapData())
-                        .environmentObject(themeManager)
+                    AccuracyCardView(
+                        title: "近1小时准确率",
+                        accuracy: getHourlyAccuracy(),
+                        color: ThemeManager.ThemeColors.chartColors[3]
+                    )
                 }
-                .padding()
-                .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
-                .cornerRadius(16)
-                
-                // 趋势图表
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("击键趋势")
-                        .font(.headline)
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                    
-                    Chart {
-                        ForEach(getTrendData(), id: \.date) { item in
-                            LineMark(
-                                x: .value("时间", item.date),
-                                y: .value("次数", item.count)
-                            )
-                            .foregroundStyle(ThemeManager.ThemeColors.chartColors[0])
-                            
-                            AreaMark(
-                                x: .value("时间", item.date),
-                                y: .value("次数", item.count)
-                            )
-                            .foregroundStyle(
-                                .linearGradient(
-                                    colors: [
-                                        ThemeManager.ThemeColors.chartColors[0].opacity(0.3),
-                                        ThemeManager.ThemeColors.chartColors[0].opacity(0.0)
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                        }
-                    }
-                    .frame(height: 200)
-                }
-                .padding()
-                .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
-                .cornerRadius(16)
             }
             .padding()
         }
@@ -109,13 +62,6 @@ struct DashboardView: View {
     private func getTodayKeyCount() -> Int {
         let calendar = Calendar.current
         return keyboardMonitor.keyStats.dailyStats[calendar.startOfDay(for: Date())] ?? 0
-    }
-    
-    private func getAverageHourlyCount() -> Int {
-        let calendar = Calendar.current
-        let todayCount = getTodayKeyCount()
-        let currentHour = calendar.component(.hour, from: Date())
-        return currentHour > 0 ? todayCount / currentHour : todayCount
     }
     
     private func getCurrentTypingSpeed() -> Double {
@@ -129,58 +75,27 @@ struct DashboardView: View {
         return Double(recentKeyStrokes)
     }
     
-    private func getHeatMapData() -> [(hour: Int, intensity: Double)] {
-        let calendar = Calendar.current
-        let now = Date()
-        
-        return (0..<24).map { hour in
-            guard let hourDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: now) else {
-                return (hour: hour, intensity: 0.0)
-            }
-            
-            let count = keyboardMonitor.keyStats.hourlyStats[hourDate] ?? 0
-            let maxCount = keyboardMonitor.keyStats.hourlyStats.values.max() ?? 1
-            let intensity = Double(count) / Double(maxCount)
-            
-            return (hour: hour, intensity: intensity)
-        }
+    private func getHistoricalAccuracy() -> Double {
+        let totalKeys = keyboardMonitor.keyStats.totalCount
+        let totalDeletes = keyboardMonitor.keyStats.totalDeleteCount
+        guard totalKeys > 0 else { return 0 }
+        return Double(totalKeys - totalDeletes) / Double(totalKeys)
     }
     
-    private func getTrendData() -> [(date: Date, count: Int)] {
-        let calendar = Calendar.current
+    private func getHourlyAccuracy() -> Double {
         let now = Date()
+        let hourAgo = now.addingTimeInterval(-3600)
         
-        let dateRange: [Date]
-        switch selectedTimeRange {
-        case .day:
-            dateRange = (0..<24).compactMap { hour in
-                calendar.date(byAdding: .hour, value: -hour, to: now)
-            }
-        case .week:
-            dateRange = (0..<7).compactMap { day in
-                calendar.date(byAdding: .day, value: -day, to: now)
-            }
-        case .month:
-            dateRange = (0..<30).compactMap { day in
-                calendar.date(byAdding: .day, value: -day, to: now)
-            }
-        case .year:
-            dateRange = (0..<12).compactMap { month in
-                calendar.date(byAdding: .month, value: -month, to: now)
-            }
-        }
+        let hourlyKeys = keyboardMonitor.keyStats.hourlyStats.filter { timestamp, _ in
+            timestamp >= hourAgo && timestamp <= now
+        }.values.reduce(0, +)
         
-        return dateRange.map { date in
-            let count: Int
-            switch selectedTimeRange {
-            case .day:
-                count = keyboardMonitor.keyStats.hourlyStats[date] ?? 0
-            case .week, .month, .year:
-                let dayStart = calendar.startOfDay(for: date)
-                count = keyboardMonitor.keyStats.dailyStats[dayStart] ?? 0
-            }
-            return (date: date, count: count)
-        }.reversed()
+        let hourlyDeletes = keyboardMonitor.keyStats.hourlyDeleteStats.filter { timestamp, _ in
+            timestamp >= hourAgo && timestamp <= now
+        }.values.reduce(0, +)
+        
+        guard hourlyKeys > 0 else { return 0 }
+        return Double(hourlyKeys - hourlyDeletes) / Double(hourlyKeys)
     }
 }
 
@@ -214,21 +129,22 @@ struct StatCardView: View {
     }
 }
 
+// 改进的速度计视图 - 更紧凑的布局
 struct SpeedMeterView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let currentSpeed: Double
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 8) { // 减小间距
             Text("实时击键速度")
-                .font(.headline)
+                .font(.subheadline) // 减小字体
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
             ZStack {
                 Circle()
                     .stroke(
                         ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode).opacity(0.2),
-                        lineWidth: 20
+                        lineWidth: 12 // 减小线宽
                     )
                 
                 Circle()
@@ -236,25 +152,119 @@ struct SpeedMeterView: View {
                     .stroke(
                         ThemeManager.ThemeColors.chartColors[0],
                         style: StrokeStyle(
-                            lineWidth: 20,
+                            lineWidth: 12, // 减小线宽
                             lineCap: .round
                         )
                     )
                     .rotationEffect(.degrees(-90))
                 
-                VStack {
+                VStack(spacing: 4) { // 减小间距
                     Text("\(Int(currentSpeed))")
-                        .font(.system(size: 36, weight: .bold))
+                        .font(.system(size: 28, weight: .bold)) // 减小字体
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     Text("次/分钟")
-                        .font(.subheadline)
+                        .font(.caption) // 使用更小的字体
                         .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                 }
             }
-            .frame(height: 200)
         }
         .padding()
         .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
         .cornerRadius(16)
     }
-} 
+}
+
+// 新增的准确率卡片视图
+struct AccuracyCardView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    let title: String
+    let accuracy: Double
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
+            
+            Text(String(format: "%.1f%%", accuracy * 100))
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+            
+            ProgressView(value: accuracy)
+                .tint(color)
+        }
+        .padding()
+        .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
+        .cornerRadius(16)
+    }
+}
+
+// 改进的气泡动画视图
+struct KeyBubbleView: View {
+    let latestKeyStroke: KeyStroke?
+    @State private var bubbles: [(id: UUID, key: String, position: CGPoint, offset: CGFloat, timestamp: Date)] = []
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(bubbles, id: \.id) { bubble in
+                    Text(bubble.key)
+                        .modifier(BubbleTextStyle())
+                        .position(x: bubble.position.x, y: bubble.position.y + bubble.offset)
+                        .opacity(CGFloat(1.0) - (abs(bubble.offset) / CGFloat(200.0)))
+                }
+            }
+            .onChange(of: latestKeyStroke) { _, newKeyStroke in
+                if let keyStroke = newKeyStroke,
+                   let character = keyStroke.character {
+                    addNewBubble(key: character, timestamp: keyStroke.timestamp, in: geometry.size)
+                }
+            }
+        }
+    }
+    
+    private func addNewBubble(key: String, timestamp: Date, in size: CGSize) {
+        // 随机生成起始位置（底部区域）
+        let randomX = CGFloat.random(in: 20...(size.width - 20))
+        let startY = size.height - 20
+        
+        let newBubble = (
+            id: UUID(),
+            key: key,
+            position: CGPoint(x: randomX, y: startY),
+            offset: CGFloat(0),
+            timestamp: timestamp
+        )
+        
+        bubbles.append(newBubble)
+        
+        withAnimation(.easeOut(duration: 2)) {
+            if let index = bubbles.firstIndex(where: { $0.id == newBubble.id }) {
+                bubbles[index].offset = -200 // 向上飘动的距离
+            }
+        }
+        
+        // 2秒后移除气泡
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            bubbles.removeAll { $0.id == newBubble.id }
+        }
+    }
+}
+
+struct BubbleTextStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(size: 16, weight: .medium))
+            .padding(8)
+            .background(.ultraThinMaterial)
+            .cornerRadius(8)
+    }
+}
+
+// 添加字体大小扩展
+extension View {
+    func fontSize(_ size: CGFloat) -> some View {
+        self.font(.system(size: size))
+    }
+}

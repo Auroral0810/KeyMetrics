@@ -2,8 +2,10 @@ import Foundation
 import Cocoa
 
 class KeyboardMonitor: ObservableObject {
-    @Published var keyStats = KeyStats(totalCount: 0, keyFrequency: [:], hourlyStats: [:], dailyStats: [:])
+    @Published var keyStats = KeyStats()
     @Published var isMonitoring = false
+    @Published var latestKeyStroke: KeyStroke?
+    
     private var eventTap: CFMachPort?
     private let statsQueue = DispatchQueue(label: "com.keymetrics.stats")
     private let saveInterval: TimeInterval = 60 // 每60秒保存一次数据
@@ -98,12 +100,10 @@ class KeyboardMonitor: ObservableObject {
         statsQueue.async { [weak self] in
             guard let self = self else { return }
             
-            // 检查事件类型，确保只处理按下事件
             if event.type != .keyDown {
                 return
             }
             
-            // 检查事件时间戳，避免重复计数
             let currentTime = ProcessInfo.processInfo.systemUptime
             if (currentTime - self.lastEventTime) < self.minimumTimeBetweenEvents {
                 return
@@ -113,13 +113,18 @@ class KeyboardMonitor: ObservableObject {
             
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             
-            // 过滤掉修饰键（如 Command、Option、Control、Shift）
+            // 过滤掉修饰键
             let modifierKeyCodes = Set([54, 55, 56, 57, 58, 59, 60, 61, 62, 63])
             if modifierKeyCodes.contains(Int(keyCode)) {
                 return
             }
             
+            // 创建新的 KeyStroke
+            let character = self.getKeyName(for: Int(keyCode))
+            let keyStroke = KeyStroke(keyCode: Int(keyCode), character: character)
+            
             DispatchQueue.main.async {
+                self.latestKeyStroke = keyStroke
                 self.updateStats(keyCode: Int(keyCode))
             }
         }
@@ -129,6 +134,16 @@ class KeyboardMonitor: ObservableObject {
         keyStats.totalCount += 1
         keyStats.keyFrequency[keyCode, default: 0] += 1
         
+        // 检查是否是删除键
+        if keyCode == 51 { // 51 是删除键的 keyCode
+            keyStats.totalDeleteCount += 1
+            
+            let now = Date()
+            let calendar = Calendar.current
+            let hourDate = calendar.startOfHour(for: now)
+            keyStats.hourlyDeleteStats[hourDate, default: 0] += 1
+        }
+        
         let now = Date()
         let calendar = Calendar.current
         let hourDate = calendar.startOfHour(for: now)
@@ -137,7 +152,6 @@ class KeyboardMonitor: ObservableObject {
         keyStats.hourlyStats[hourDate, default: 0] += 1
         keyStats.dailyStats[dayDate, default: 0] += 1
         
-        // 触发UI更新
         objectWillChange.send()
     }
     
@@ -165,10 +179,9 @@ class KeyboardMonitor: ObservableObject {
     }
     
     func clearStats() {
-        statsQueue.async { [weak self] in
-            guard let self = self else { return }
-            self.keyStats = KeyStats(totalCount: 0, keyFrequency: [:], hourlyStats: [:], dailyStats: [:])
-            self.saveStats()
+        DispatchQueue.main.async { [weak self] in
+            self?.keyStats = KeyStats()
+            self?.saveStats()
         }
     }
     
