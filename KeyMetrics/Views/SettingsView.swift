@@ -3,6 +3,7 @@ import AlertToast
 
 struct SettingsView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @State private var showExportSuccess = false
     @State private var showClearAlert = false
     @State private var autoStart = true
@@ -120,7 +121,10 @@ struct SettingsView: View {
     }
     
     private func clearData() {
-        // TODO: 实现清除逻辑
+        // 清空所有统计数据
+        keyboardMonitor.keyStats = KeyStats()
+        UserDefaults.standard.removeObject(forKey: "keyStats")
+        showClearAlert = false
     }
 }
 

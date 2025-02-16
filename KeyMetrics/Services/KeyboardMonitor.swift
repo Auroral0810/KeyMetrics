@@ -322,7 +322,6 @@ class KeyboardMonitor: ObservableObject {
             49: "space",
             54: "command",  // 右 command
             61: "option",   // 右 option
-            62: "control",  // 右 control
             
             // 方向键
             126: "↑",
