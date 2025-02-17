@@ -56,8 +56,15 @@ struct KeyFrequencyView: View {
             }
         }
         
-        return filteredFrequency
-            .map { (key: keyboardMonitor.getKeyName(for: $0.key), count: $0.value) }
+        // 合并相同按键的计数
+        var mergedFrequency: [String: Int] = [:]
+        for (keyCode, count) in filteredFrequency {
+            let keyName = keyboardMonitor.getKeyName(for: keyCode)
+            mergedFrequency[keyName, default: 0] += count
+        }
+        
+        return mergedFrequency
+            .map { (key: $0.key, count: $0.value) }
             .sorted { item1, item2 in
                 if item1.count == item2.count {
                     return item1.key < item2.key
@@ -138,7 +145,11 @@ struct KeyFrequencyView: View {
                 VStack {
                     switch selectedChartType {
                     case .donut:
-                        DonutChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
+                        DonutChart(
+                            data: sortedKeyFrequency.prefix(10),
+                            hoveredKey: $hoveredKey,
+                            totalKeyCount: sortedKeyFrequency.reduce(0) { $0 + $1.count }
+                        )
                     case .bar:
                         BarChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
                     case .line:
@@ -243,7 +254,7 @@ struct RankingRow: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .frame(height: 36)  // 添加固定高度
+        .frame(height: 36)
         .background(isHovered ? Color.blue.opacity(0.1) : Color.clear)
         .cornerRadius(8)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
@@ -254,10 +265,34 @@ struct RankingRow: View {
 struct DonutChart: View {
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
+    private let totalKeyCount: Int
+    
+    private var chartData: [(key: String, count: Int)] {
+        let top10Data = Array(data)
+        let top10Total = top10Data.reduce(0) { $0 + $1.count }
+        let othersCount = totalKeyCount - top10Total
+        
+        if othersCount > 0 {
+            var combinedData = top10Data
+            combinedData.append((key: "其他", count: othersCount))
+            return combinedData
+        }
+        return top10Data
+    }
+    
+    init(data: ArraySlice<(key: String, count: Int)>, hoveredKey: Binding<String?>, totalKeyCount: Int) {
+        self.data = data
+        self._hoveredKey = hoveredKey
+        self.totalKeyCount = totalKeyCount
+    }
+    
+    private func calculatePercentage(count: Int) -> Double {
+        return Double(count) / Double(totalKeyCount) * 100
+    }
     
     var body: some View {
         Chart {
-            ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
+            ForEach(chartData, id: \.key) { item in
                 SectorMark(
                     angle: .value("Count", item.count),
                     innerRadius: .ratio(0.6),
@@ -265,6 +300,28 @@ struct DonutChart: View {
                 )
                 .foregroundStyle(by: .value("Key", item.key))
                 .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+                .annotation(position: .overlay) {
+                    if hoveredKey == item.key {
+                        // 悬停时显示详细信息
+                        VStack(spacing: 4) {
+                            Text(item.key)
+                                .font(.system(size: 12, weight: .bold))
+                            Text("\(item.count)次")
+                                .font(.system(size: 11))
+                            Text(String(format: "%.1f%%", calculatePercentage(count: item.count)))
+                                .font(.system(size: 11))
+                        }
+                        .padding(6)
+                        .background(Color.black.opacity(0.6))
+                        .foregroundColor(.white)
+                        .cornerRadius(4)
+                    } else if item.key == "其他" {
+                        // "其他"类别始终显示百分比
+                        Text(String(format: "%.1f%%", calculatePercentage(count: item.count)))
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
             }
         }
         .frame(height: 300)

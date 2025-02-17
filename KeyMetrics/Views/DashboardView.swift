@@ -276,7 +276,7 @@ struct KeyboardHeatMapView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let keyStats: KeyStats
     
-    // 完整键盘布局数据，与 KeyboardMonitor 保持一致
+    // 修改键盘布局数据，为重复按键添加唯一标识符
     private let keyboardLayout: [[KeyData]] = [
         // 功能键行
         [
@@ -322,23 +322,28 @@ struct KeyboardHeatMapView: View {
         ],
         // 第三行字母，修正 shift 键码
         [
-            KeyData(key: "⇧", code: 56, id: "shift_left"),
-            KeyData(key: "Z", code: 6), KeyData(key: "X", code: 7),
-            KeyData(key: "C", code: 8), KeyData(key: "V", code: 9),
-            KeyData(key: "B", code: 11), KeyData(key: "N", code: 45),
-            KeyData(key: "M", code: 46), KeyData(key: ",", code: 43),
-            KeyData(key: ".", code: 47), KeyData(key: "/", code: 44),
-            KeyData(key: "⇧", code: 60, id: "shift_right")  // 修正右 shift 键码
+            KeyData(key: "⇧", code: 56, id: "shift_left"),  // 添加唯一ID
+            KeyData(key: "Z", code: 6),
+            KeyData(key: "X", code: 7),
+            KeyData(key: "C", code: 8),
+            KeyData(key: "V", code: 9),
+            KeyData(key: "B", code: 11),
+            KeyData(key: "N", code: 45),
+            KeyData(key: "M", code: 46),
+            KeyData(key: ",", code: 43),
+            KeyData(key: ".", code: 47),
+            KeyData(key: "/", code: 44),
+            KeyData(key: "⇧", code: 60, id: "shift_right")  // 添加唯一ID
         ],
-        // 底部功能键行，修正 fn 和其他修饰键的键码
+        // 底部功能键行
         [
             KeyData(key: "fn", code: 179),
             KeyData(key: "⌃", code: 59),
-            KeyData(key: "⌥", code: 58, id: "option_left"),
-            KeyData(key: "⌘", code: 55, id: "command_left"),
+            KeyData(key: "⌥", code: 58, id: "option_left"),  // 添加唯一ID
+            KeyData(key: "⌘", code: 55, id: "command_left"),  // 添加唯一ID
             KeyData(key: "space", code: 49),
-            KeyData(key: "⌘", code: 54, id: "command_right"),
-            KeyData(key: "⌥", code: 61, id: "option_right"),
+            KeyData(key: "⌘", code: 54, id: "command_right"),  // 添加唯一ID
+            KeyData(key: "⌥", code: 61, id: "option_right"),  // 添加唯一ID
             KeyData(key: "←", code: 123),
             KeyData(key: "↑", code: 126),
             KeyData(key: "↓", code: 125),
@@ -360,7 +365,7 @@ struct KeyboardHeatMapView: View {
                     ForEach(keyboardLayout.indices, id: \.self) { rowIndex in
                         HStack(spacing: 2) {
                             Spacer(minLength: 0)
-                            ForEach(keyboardLayout[rowIndex], id: \.key) { keyData in
+                            ForEach(keyboardLayout[rowIndex], id: \.id) { keyData in
                                 KeyCell(
                                     key: keyData.key,
                                     frequency: getKeyFrequency(keyCode: keyData.code),

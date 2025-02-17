@@ -16,6 +16,10 @@ class KeyboardMonitor: ObservableObject {
     // 用于计算实时速度的属性
     private var keyPressTimestamps: [Date] = []
     
+    private var lastProcessedKeyCode: Int = -1
+    private var lastProcessedTime: TimeInterval = 0
+    private let debounceInterval: TimeInterval = 0.1 // 100ms 防重复间隔
+    
     init() {
         loadStats()
         checkAccessibilityPermissions()
@@ -137,29 +141,50 @@ class KeyboardMonitor: ObservableObject {
                 return
             }
             
+            let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
             let currentTime = ProcessInfo.processInfo.systemUptime
-            if (currentTime - self.lastEventTime) < self.minimumTimeBetweenEvents {
+            
+            // 特别处理听写键 (F5)
+            if keyCode == 176 {
+                // 如果距离上次处理的时间太短，直接返回
+                if (currentTime - self.lastProcessedTime) < 0.2 { // 增加到 200ms
+                    return
+                }
+            } else {
+                // 其他键使用正常的防重复间隔
+                if keyCode == self.lastProcessedKeyCode && 
+                   (currentTime - self.lastProcessedTime) < self.debounceInterval {
+                    return
+                }
+            }
+            
+            // 更新最后处理的按键信息
+            self.lastProcessedKeyCode = keyCode
+            self.lastProcessedTime = currentTime
+            
+            // 修饰键列表
+            let modifierKeyCodes = Set([
+                54, 55,  // Command (左右)
+                56, 60,  // Shift (左右)
+                58, 61,  // Option (左右)
+                59,      // Control
+                63      // Function
+            ])
+            
+            // 如果是修饰键，直接返回
+            if modifierKeyCodes.contains(keyCode) {
                 return
             }
             
-            self.lastEventTime = currentTime
-            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-            
-            // 过滤掉修饰键，因为它们会在 handleModifierKeyEvent 中处理
-            let modifierKeyCodes = Set([54, 55, 56, 57, 58, 59, 60, 61, 62, 63])
-            if modifierKeyCodes.contains(Int(keyCode)) {
-                return
-            }
-            
-            // 记录按键时间并立即更新速度
+            // 记录按键并更新统计
             DispatchQueue.main.async {
                 self.keyPressTimestamps.append(Date())
                 self.calculateCurrentSpeed()
                 
-                let character = self.getKeyName(for: Int(keyCode))
-                let keyStroke = KeyStroke(keyCode: Int(keyCode), character: character)
+                let character = self.getKeyName(for: keyCode)
+                let keyStroke = KeyStroke(keyCode: keyCode, character: character)
                 self.latestKeyStroke = keyStroke
-                self.updateStats(keyCode: Int(keyCode))
+                self.updateStats(keyCode: keyCode)
             }
         }
     }
@@ -168,32 +193,35 @@ class KeyboardMonitor: ObservableObject {
         statsQueue.async { [weak self] in
             guard let self = self else { return }
             
-            let flags = event.flags
-            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-            
-            // 获取上一次的修饰键状态
+            let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
             let currentTime = ProcessInfo.processInfo.systemUptime
-            if (currentTime - self.lastEventTime) < self.minimumTimeBetweenEvents {
+            let flags = event.flags
+            
+            // 检查是否是重复按键
+            if keyCode == self.lastProcessedKeyCode && 
+               (currentTime - self.lastProcessedTime) < self.debounceInterval {
                 return
             }
             
-            // 只在修饰键按下时记录，避免重复计数
-            if flags.contains(.maskCommand) ||
-               flags.contains(.maskShift) ||
-               flags.contains(.maskControl) ||
-               flags.contains(.maskAlternate) {
+            // 检查修饰键是否真的被按下
+            let isKeyDown = flags.contains(.maskCommand) ||
+                           flags.contains(.maskShift) ||
+                           flags.contains(.maskAlternate) ||
+                           flags.contains(.maskControl)
+            
+            if isKeyDown {
+                // 更新最后处理的按键信息
+                self.lastProcessedKeyCode = keyCode
+                self.lastProcessedTime = currentTime
                 
-                self.lastEventTime = currentTime
-                
-                // 记录按键时间并立即更新速度
                 DispatchQueue.main.async {
                     self.keyPressTimestamps.append(Date())
                     self.calculateCurrentSpeed()
                     
-                    let character = self.getKeyName(for: Int(keyCode))
-                    let keyStroke = KeyStroke(keyCode: Int(keyCode), character: character)
+                    let character = self.getKeyName(for: keyCode)
+                    let keyStroke = KeyStroke(keyCode: keyCode, character: character)
                     self.latestKeyStroke = keyStroke
-                    self.updateStats(keyCode: Int(keyCode))
+                    self.updateStats(keyCode: keyCode)
                 }
             }
         }
@@ -310,7 +338,7 @@ class KeyboardMonitor: ObservableObject {
             36: "return",
             
             // 第五行
-            56: "shift",
+            56: "shift_left",
             6: "Z",
             7: "X",
             8: "C",
@@ -321,16 +349,16 @@ class KeyboardMonitor: ObservableObject {
             43: ",",
             47: ".",
             44: "/",
-            60: "shift",  // 右 shift
+            60: "shift_right",  // 右 shift
             
             // 最后一行
             179: "fn",
             59: "control",
-            58: "option",
-            55: "command",
+            58: "option_left",
+            55: "command_left",
             49: "space",
-            54: "command",  // 右 command
-            61: "option",   // 右 option
+            54: "command_right",  // 右 command
+            61: "option_right",   // 右 option
             
             // 方向键
             126: "↑",
@@ -360,6 +388,18 @@ class KeyboardMonitor: ObservableObject {
     
     deinit {
         // 清理定时器等资源
+    }
+    
+    // 添加一个函数来检查特殊功能键
+    private func isSpecialFunctionKey(_ keyCode: Int) -> Bool {
+        let specialFunctionKeys = Set([
+            160,  // F3 Mission Control
+            177,  // F4 Spotlight
+            176,  // F5 Dictation
+            178,  // F6 Do Not Disturb
+            // 可以根据需要添加其他特殊功能键
+        ])
+        return specialFunctionKeys.contains(keyCode)
     }
 }
 

@@ -94,6 +94,7 @@ struct DayDetailView: View {
     
     // 获取按键名称的映射
     private let keyMap: [Int: String] = [
+            // 第一行 Function 键（根据最新的 MacBook 键盘布局）
         53: "esc",
         122: "F1",     // 调节亮度减
         120: "F2",     // 调节亮度加
@@ -156,7 +157,7 @@ struct DayDetailView: View {
         36: "return",
         
         // 第五行
-        56: "shift",
+        56: "shift_left",
         6: "Z",
         7: "X",
         8: "C",
@@ -167,16 +168,16 @@ struct DayDetailView: View {
         43: ",",
         47: ".",
         44: "/",
-        60: "shift",  // 右 shift
+        60: "shift_right",  // 右 shift
         
         // 最后一行
         179: "fn",
         59: "control",
-        58: "option",
-        55: "command",
+        58: "option_left",
+        55: "command_left",
         49: "space",
-        54: "command",  // 右 command
-        61: "option",   // 右 option
+        54: "command_right",  // 右 command
+        61: "option_right",   // 右 option
         
         // 方向键
         126: "↑",
