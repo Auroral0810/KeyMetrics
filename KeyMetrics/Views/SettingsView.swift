@@ -24,16 +24,21 @@ struct SettingsView: View {
                 SettingSection(title: "常规", icon: "gear") {
                     VStack(spacing: 16) {
                         SettingToggleRow(title: "开机自启动", isOn: $autoStart)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal, 4)
                         
                         Divider()
+                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         SettingPickerRow(title: "语言", selection: $selectedLanguage, options: languages)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal, 4)
                         
                         Divider()
+                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         SettingPickerRow(title: "字体", selection: $selectedFont, options: fonts)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal, 4)
                     }
                 }
@@ -42,11 +47,13 @@ struct SettingsView: View {
                 SettingSection(title: "外观", icon: "paintbrush.fill") {
                     VStack(spacing: 16) {
                         SettingToggleRow(title: "深色模式", isOn: $themeManager.isDarkMode)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal, 4)
                         
                         Divider()
+                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
-                        ColorThemeSelector()
+                        ThemePickerView()
                             .padding(.horizontal, 4)
                     }
                 }
@@ -58,7 +65,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("自动备份")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                             
                             HStack(spacing: 20) {
                                 Picker("间隔", selection: $backupInterval) {
@@ -68,6 +75,7 @@ struct SettingsView: View {
                                 }
                                 .pickerStyle(.segmented)
                                 .frame(maxWidth: .infinity)
+                                .colorMultiply(themeManager.isDarkMode ? .white : .black)
                                 
                                 Toggle("", isOn: $showNotification)
                                     .labelsHidden()
@@ -75,6 +83,7 @@ struct SettingsView: View {
                         }
                         
                         Divider()
+                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         // 数据操作按钮
                         HStack(spacing: 20) {
@@ -111,6 +120,7 @@ struct SettingsView: View {
                     Button(action: { showResetAlert = true }) {
                         HStack {
                             Label("重置所有设置", systemImage: "arrow.counterclockwise")
+                                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             Spacer()
                         }
                     }
@@ -125,12 +135,14 @@ struct SettingsView: View {
             Button("确认", role: .destructive) { clearData() }
         } message: {
             Text("此操作将清除所有数据且无法恢复，是否继续？")
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
         .alert("确认重置", isPresented: $showResetAlert) {
             Button("取消", role: .cancel) { }
             Button("确认", role: .destructive) { resetAllSettings() }
         } message: {
             Text("此操作将重置所有设置为默认值，是否继续？")
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
         .alert("导出成功", isPresented: $showExportSuccess) {
             Button("确定", role: .cancel) { }
@@ -173,6 +185,7 @@ struct SettingsView: View {
 // MARK: - 辅助视图组件
 
 struct SettingSection<Content: View>: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     let icon: String
     let content: Content
@@ -188,19 +201,49 @@ struct SettingSection<Content: View>: View {
             VStack(alignment: .leading, spacing: 16) {
                 Label(title, systemImage: icon)
                     .font(.headline)
+                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                 content
             }
         }
+        .groupBoxStyle(CustomGroupBoxStyle())
+        .environmentObject(themeManager)
+    }
+}
+
+struct CustomGroupBoxStyle: GroupBoxStyle {
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.content
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(themeManager.isDarkMode 
+                        ? Color(.darkGray).opacity(0.2) 
+                        : Color(.lightGray).opacity(0.1))
+            )
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(
+                        themeManager.isDarkMode 
+                            ? Color.gray.opacity(0.3) 
+                            : Color.gray.opacity(0.2),
+                        lineWidth: 1
+                    )
+            )
     }
 }
 
 struct SettingToggleRow: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     @Binding var isOn: Bool
     
     var body: some View {
         HStack {
             Text(title)
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             Spacer()
             Toggle("", isOn: $isOn)
                 .labelsHidden()
@@ -209,6 +252,7 @@ struct SettingToggleRow: View {
 }
 
 struct SettingPickerRow: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     @Binding var selection: String
     let options: [String]
@@ -216,10 +260,13 @@ struct SettingPickerRow: View {
     var body: some View {
         HStack {
             Text(title)
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             Spacer()
             Picker("", selection: $selection) {
                 ForEach(options, id: \.self) { option in
-                    Text(option).tag(option)
+                    Text(option)
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .tag(option)
                 }
             }
             .labelsHidden()
@@ -263,6 +310,7 @@ struct SettingButton: View {
 }
 
 struct DataButton: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     let icon: String
     let color: Color
@@ -276,7 +324,7 @@ struct DataButton: View {
                     .foregroundColor(color)
                 Text(title)
                     .font(.callout)
-                    .foregroundColor(.primary)
+                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
@@ -301,14 +349,15 @@ struct ScaleButtonStyle: ButtonStyle {
     }
 }
 
-struct ColorThemeSelector: View {
-    @State private var selectedTheme = 0
-    let themes = ["默认", "海洋", "森林", "日落"]
+struct ThemePickerView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    let themes = ["default", "ocean", "forest", "sunset"]
     
     var body: some View {
         VStack(alignment: .leading) {
             Text("主题色")
-                .foregroundColor(.gray)
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+            
             HStack(spacing: 12) {
                 ForEach(0..<themes.count, id: \.self) { index in
                     Circle()
@@ -316,23 +365,19 @@ struct ColorThemeSelector: View {
                         .frame(width: 30, height: 30)
                         .overlay(
                             Circle()
-                                .strokeBorder(selectedTheme == index ? .blue : .clear, lineWidth: 2)
+                                .strokeBorder(themeManager.currentTheme == themes[index] ? .blue : .clear, lineWidth: 2)
                         )
                         .onTapGesture {
-                            selectedTheme = index
+                            themeManager.currentTheme = themes[index]
+                            themeManager.applyTheme()
                         }
                 }
             }
         }
+        .padding(.vertical, 8)
     }
     
     private func getThemeColor(_ index: Int) -> Color {
-        switch index {
-        case 0: return .blue
-        case 1: return .cyan
-        case 2: return .green
-        case 3: return .orange
-        default: return .blue
-        }
+        ThemeManager.ThemeColors.chartColors[index % ThemeManager.ThemeColors.chartColors.count]
     }
 }

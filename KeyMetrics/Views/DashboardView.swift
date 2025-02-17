@@ -7,7 +7,7 @@ struct DashboardView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 28) {
+            VStack(spacing: 32) {
                 // 顶部统计卡片
                 HStack(spacing: 20) {
                     StatCardView(
@@ -16,7 +16,7 @@ struct DashboardView: View {
                         icon: "keyboard",
                         color: ThemeManager.ThemeColors.chartColors[0]
                     )
-                    .frame(height: 100)
+                    .frame(height: 120)
                     
                     StatCardView(
                         title: "今日按键",
@@ -24,7 +24,7 @@ struct DashboardView: View {
                         icon: "clock",
                         color: ThemeManager.ThemeColors.chartColors[1]
                     )
-                    .frame(height: 100)
+                    .frame(height: 120)
                 }
                 
                 // 中间区域：速度计和气泡区
@@ -46,19 +46,19 @@ struct DashboardView: View {
                         accuracy: getHistoricalAccuracy(),
                         color: ThemeManager.ThemeColors.chartColors[2]
                     )
-                    .frame(height: 100)
+                    .frame(height: 120)
                     
                     AccuracyCardView(
                         title: "近1小时准确率",
                         accuracy: getHourlyAccuracy(),
                         color: ThemeManager.ThemeColors.chartColors[3]
                     )
-                    .frame(height: 100)
+                    .frame(height: 120)
                 }
                 
                 // 键盘负荷分布图
                 KeyboardHeatMapView(keyStats: keyboardMonitor.keyStats)
-                    .frame(minHeight: 280, maxHeight: .infinity)
+                    .frame(minHeight: 320, maxHeight: .infinity)
                     .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
                     .cornerRadius(16)
             }

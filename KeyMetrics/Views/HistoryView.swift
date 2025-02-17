@@ -3,23 +3,27 @@ import Charts
 
 struct HistoryView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedTimeRange: TimeRange = .week
     @State private var selectedDate: Date? = nil
     @State private var showingDateDetail = false
     
-    enum TimeRange {
-        case day, week, month, year
+    enum TimeRange: String, CaseIterable {
+        case day = "天"
+        case week = "周"
+        case month = "月"
+        case year = "年"
     }
     
     var body: some View {
         VStack {
             Picker("时间范围", selection: $selectedTimeRange) {
-                Text("日").tag(TimeRange.day)
-                Text("周").tag(TimeRange.week)
-                Text("月").tag(TimeRange.month)
-                Text("年").tag(TimeRange.year)
+                ForEach(TimeRange.allCases, id: \.self) { range in
+                    Text(range.rawValue).tag(range)
+                }
             }
             .pickerStyle(SegmentedPickerStyle())
+            .colorMultiply(themeManager.isDarkMode ? .white : .black)
             .padding()
             
             Chart {
@@ -45,6 +49,8 @@ struct HistoryView: View {
                         Spacer()
                         Text("\(data.count) 次")
                     }
+                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                    .listRowBackground(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
                     .contentShape(Rectangle())
                     .onTapGesture {
                         selectedDate = data.date
@@ -52,7 +58,10 @@ struct HistoryView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         }
+        .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         .sheet(isPresented: $showingDateDetail) {
             if let date = selectedDate {
                 DayDetailView(date: date, keyStats: keyboardMonitor.keyStats)

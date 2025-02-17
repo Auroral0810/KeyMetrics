@@ -2,35 +2,58 @@ import SwiftUI
 
 class ThemeManager: ObservableObject {
     @Published var isDarkMode: Bool = true
+    @Published var currentTheme: String = "default"
+    
+    func applyTheme() {
+        // 保存用户偏好
+        UserDefaults.standard.set(isDarkMode, forKey: "IsDarkMode")
+        UserDefaults.standard.set(currentTheme, forKey: "CurrentTheme")
+        UserDefaults.standard.synchronize()
+        
+        // 发送主题变更通知
+        objectWillChange.send()
+        
+        // 更新系统外观
+        if let window = NSApplication.shared.windows.first {
+            window.appearance = isDarkMode ? NSAppearance(named: .darkAqua) : NSAppearance(named: .aqua)
+        }
+    }
     
     struct ThemeColors {
         static func accent(_ isDark: Bool = true) -> Color {
             isDark ? Color(hex: "#4ECDC4") : Color(hex: "#45B7D1")
         }
         
-        static func background(_ isDark: Bool = true) -> Color {
+        static func background(_ isDark: Bool) -> Color {
             isDark ? Color(hex: "#1A1A1A") : Color(hex: "#F5F5F5")
         }
         
-        static func cardBackground(_ isDark: Bool = true) -> Color {
-            isDark ? Color(hex: "#2D2D2D") : Color(hex: "#FFFFFF")
+        static func cardBackground(_ isDark: Bool) -> Color {
+            isDark ? Color(.darkGray).opacity(0.2) : Color(.lightGray).opacity(0.1)
         }
         
-        static func text(_ isDark: Bool = true) -> Color {
-            isDark ? Color(hex: "#FFFFFF") : Color(hex: "#000000")
+        static func text(_ isDark: Bool) -> Color {
+            isDark ? .white : .black
         }
         
-        static func secondaryText(_ isDark: Bool = true) -> Color {
-            isDark ? Color(hex: "#B0B0B0") : Color(hex: "#666666")
+        static func secondaryText(_ isDark: Bool) -> Color {
+            isDark ? Color(.lightGray) : Color(.darkGray)
+        }
+        
+        static func divider(_ isDark: Bool) -> Color {
+            isDark ? Color(.darkGray) : Color(.lightGray)
+        }
+        
+        static func border(_ isDark: Bool) -> Color {
+            isDark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2)
         }
         
         // 图表颜色
         static let chartColors: [Color] = [
-            Color(hex: "#FF6B6B"),
-            Color(hex: "#4ECDC4"),
-            Color(hex: "#45B7D1"),
-            Color(hex: "#96CEB4"),
-            Color(hex: "#FFEEAD")
+            .blue,      // 默认
+            .cyan,      // 海洋
+            .green,     // 森林
+            .orange     // 日落
         ]
     }
 }

@@ -97,6 +97,7 @@ struct KeyFrequencyView: View {
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
+                .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 
                 Spacer()
                 
@@ -106,14 +107,16 @@ struct KeyFrequencyView: View {
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
+                .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 
                 Button(action: { showingExportSheet = true }) {
                     Label("导出", systemImage: "square.and.arrow.up")
                 }
                 .buttonStyle(.bordered)
+                .colorMultiply(themeManager.isDarkMode ? .white : .black)
             }
             .padding()
-            .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
+            .background(themeManager.isDarkMode ? ThemeManager.ThemeColors.cardBackground(true) : Color(.lightGray).opacity(0.1))
             .cornerRadius(12)
             
             HStack(spacing: 20) {
@@ -163,6 +166,7 @@ struct KeyFrequencyView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("TOP 10 按键")
                         .font(.headline)
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
                     // 获取实际的按键数据
                     let actualData = sortedKeyFrequency.prefix(10)
@@ -208,6 +212,7 @@ struct KeyFrequencyView: View {
 
 // 统计卡片组件
 struct StatCard: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     let value: String
     let icon: String
@@ -222,10 +227,11 @@ struct StatCard: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     .font(.subheadline)
                 
                 Text(value)
+                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     .font(.title3)
                     .fontWeight(.medium)
             }
@@ -233,13 +239,14 @@ struct StatCard: View {
             Spacer()
         }
         .padding()
-        .background(Color(.controlBackgroundColor))
+        .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
         .cornerRadius(12)
     }
 }
 
 // 排行榜行组件
 struct RankingRow: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let rank: Int
     let key: String
     let count: Int
@@ -251,16 +258,18 @@ struct RankingRow: View {
             Text("\(rank)")
                 .font(.system(.body, design: .rounded))
                 .bold()
-                .foregroundColor(.gray)
+                .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                 .frame(width: 30)
             
             Text(key)
                 .font(.system(.body, design: .monospaced))
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
             Spacer()
             
             Text(count > 0 ? "\(count)" : "-")
                 .font(.system(.body, design: .monospaced))
+                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
@@ -273,6 +282,7 @@ struct RankingRow: View {
 
 // 环形图组件
 struct DonutChart: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     private let totalKeyCount: Int
@@ -312,7 +322,6 @@ struct DonutChart: View {
                 .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
                 .annotation(position: .overlay) {
                     if hoveredKey == item.key {
-                        // 悬停时显示详细信息
                         VStack(spacing: 4) {
                             Text(item.key)
                                 .font(.system(size: 12, weight: .bold))
@@ -326,21 +335,22 @@ struct DonutChart: View {
                         .foregroundColor(.white)
                         .cornerRadius(4)
                     } else if item.key == "其他" {
-                        // "其他"类别始终显示百分比
                         Text(String(format: "%.1f%%", calculatePercentage(count: item.count)))
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                 }
             }
         }
+        .chartLegend(position: .bottom, alignment: .center, spacing: 10)
+        .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         .frame(height: 300)
-        .chartLegend(position: .bottom)
     }
 }
 
 // 柱状图组件
 struct BarChart: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
@@ -355,13 +365,15 @@ struct BarChart: View {
                 .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
             }
         }
+        .chartLegend(position: .bottom, alignment: .center, spacing: 10)
+        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
         .frame(height: 300)
-        .chartLegend(position: .bottom)
     }
 }
 
 // 趋势图组件
 struct LineChart: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
@@ -402,8 +414,9 @@ struct LineChart: View {
                 }
             }
         }
+        .chartLegend(position: .bottom, alignment: .center, spacing: 10)
+        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
         .frame(height: 300)
-        .chartLegend(position: .bottom)
         .chartYAxis {
             AxisMarks(position: .leading)
         }
@@ -479,6 +492,7 @@ struct ExportView: View {
                 Text("导出数据")
                     .font(.title2)
                     .fontWeight(.bold)
+                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                 Spacer()
             }
             .padding(.horizontal)
@@ -493,6 +507,7 @@ struct ExportView: View {
                             .foregroundColor(.blue)
                         Text("选择时间范围")
                             .font(.headline)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     
                     Picker("时间范围", selection: $selectedTimeRange) {
@@ -501,6 +516,7 @@ struct ExportView: View {
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                    .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 }
                 
                 // 导出格式选择
@@ -510,6 +526,7 @@ struct ExportView: View {
                             .foregroundColor(.green)
                         Text("导出格式")
                             .font(.headline)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     
                     Picker("导出格式", selection: $exportFormat) {
@@ -518,12 +535,14 @@ struct ExportView: View {
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                    .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 }
                 
                 // 数据统计
                 VStack(alignment: .leading, spacing: 16) {
                     Text("数据统计")
                         .font(.headline)
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
                     VStack(spacing: 12) {
                         StatCard(title: "总按键数", value: "\(timeRangeStats.totalCount)", icon: "keyboard", color: .blue)
@@ -533,7 +552,8 @@ struct ExportView: View {
                 }
             }
             .padding()
-            .background(Color(.windowBackgroundColor))
+            .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
+            .cornerRadius(12)
             
             Spacer()
             
@@ -541,6 +561,7 @@ struct ExportView: View {
             HStack(spacing: 16) {
                 Button(action: { dismiss() }) {
                     Text("关闭")
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
@@ -566,12 +587,7 @@ struct ExportView: View {
             .padding()
         }
         .frame(width: 500)
-        .background(Color(.windowBackgroundColor))
-        .alert("导出结果", isPresented: $showAlert) {
-            Button("确定", role: .cancel) {}
-        } message: {
-            Text(alertMessage)
-        }
+        .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
     }
     
     private func getStartDate() -> Date {
