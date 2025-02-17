@@ -200,28 +200,37 @@ class KeyboardMonitor: ObservableObject {
     }
     
     private func updateStats(keyCode: Int) {
+        let now = Date()
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: now)
+        
+        // 更新总计数
         keyStats.totalCount += 1
+        
+        // 更新按键频率
         keyStats.keyFrequency[keyCode, default: 0] += 1
+        
+        // 更新每日统计
+        keyStats.dailyStats[startOfDay, default: 0] += 1
+        
+        // 更新每日按键频率
+        var dayFrequency = keyStats.dailyKeyFrequency[startOfDay] ?? [:]
+        dayFrequency[keyCode, default: 0] += 1
+        keyStats.dailyKeyFrequency[startOfDay] = dayFrequency
         
         // 检查是否是删除键
         if keyCode == 51 { // 51 是删除键的 keyCode
             keyStats.totalDeleteCount += 1
             
-            let now = Date()
-            let calendar = Calendar.current
             let hourDate = calendar.startOfHour(for: now)
             keyStats.hourlyDeleteStats[hourDate, default: 0] += 1
         }
         
-        let now = Date()
-        let calendar = Calendar.current
         let hourDate = calendar.startOfHour(for: now)
-        let dayDate = calendar.startOfDay(for: now)
-        
         keyStats.hourlyStats[hourDate, default: 0] += 1
-        keyStats.dailyStats[dayDate, default: 0] += 1
         
-        objectWillChange.send()
+        // 保存更新后的统计数据
+        saveStats()
     }
     
     private func saveStats() {

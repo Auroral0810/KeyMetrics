@@ -32,12 +32,6 @@ struct KeyFrequencyView: View {
     }
     
     var sortedKeyFrequency: [(key: String, count: Int)] {
-        keyboardMonitor.keyStats.keyFrequency
-            .map { (keyboardMonitor.getKeyName(for: $0.key), $0.value) }
-            .sorted { $0.count > $1.count }
-    }
-    
-    var timeRangeStats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String) {
         let now = Date()
         let calendar = Calendar.current
         
@@ -53,12 +47,34 @@ struct KeyFrequencyView: View {
             startDate = .distantPast
         }
         
-        let filteredData = sortedKeyFrequency.prefix(10)
-        let topKey = filteredData.first?.key ?? "-"
+        var filteredFrequency: [Int: Int] = [:]
+        for (date, keyFreq) in keyboardMonitor.keyStats.dailyKeyFrequency {
+            if date >= startDate && date <= now {
+                for (key, count) in keyFreq {
+                    filteredFrequency[key, default: 0] += count
+                }
+            }
+        }
+        
+        return filteredFrequency
+            .map { (key: keyboardMonitor.getKeyName(for: $0.key), count: $0.value) }
+            .sorted { item1, item2 in
+                if item1.count == item2.count {
+                    return item1.key < item2.key
+                }
+                return item1.count > item2.count
+            }
+    }
+    
+    var timeRangeStats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String) {
+        let data = sortedKeyFrequency
+        let totalCount = data.reduce(0) { $0 + $1.count }
+        let uniqueKeys = data.count
+        let topKey = data.first?.key ?? "-"
         
         return (
-            totalCount: filteredData.reduce(0) { $0 + $1.count },
-            uniqueKeys: filteredData.count,
+            totalCount: totalCount,
+            uniqueKeys: uniqueKeys,
             mostUsedKey: topKey
         )
     }

@@ -26,7 +26,7 @@ struct KeyStats: Codable {
     var hourlyStats: [Date: Int]  // hour: count
     var hourlyDeleteStats: [Date: Int] = [:]  // 新增：每小时删除键统计
     var dailyStats: [Date: Int]   // day: count
-    
+    var dailyKeyFrequency: [Date: [Int: Int]] = [:] // 新增字段
     init() {
         self.totalCount = 0
         self.keyFrequency = [:]
