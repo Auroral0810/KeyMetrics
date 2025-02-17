@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import UniformTypeIdentifiers
 
 struct KeyFrequencyView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
@@ -213,17 +214,26 @@ struct StatCard: View {
     let color: Color
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(title, systemImage: icon)
-                .foregroundColor(.gray)
-            
-            Text(value)
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .foregroundColor(color)
                 .font(.title2)
-                .bold()
+                .frame(width: 40)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .foregroundColor(.secondary)
+                    .font(.subheadline)
+                
+                Text(value)
+                    .font(.title3)
+                    .fontWeight(.medium)
+            }
+            
+            Spacer()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(color.opacity(0.1))
+        .background(Color(.controlBackgroundColor))
         .cornerRadius(12)
     }
 }
@@ -407,42 +417,356 @@ struct ExportView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
-    @State private var exportFormat: ExportFormat = .json
+    @State private var exportFormat: ExportFormat = .txt
+    @State private var selectedTimeRange: TimeRange = .day
+    @State private var isExporting = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
     enum ExportFormat: String, CaseIterable {
-        case json = "JSON"
+        case txt = "TXT"
         case csv = "CSV"
     }
     
+    enum TimeRange: String, CaseIterable {
+        case day = "24小时"
+        case week = "本周"
+        case month = "本月"
+        case all = "全部"
+    }
+    
+    // 计算当前选择时间范围内的统计数据
+    private var timeRangeStats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String) {
+        let now = Date()
+        let calendar = Calendar.current
+        
+        let startDate: Date
+        switch selectedTimeRange {
+        case .day:
+            startDate = calendar.date(byAdding: .hour, value: -24, to: now) ?? now
+        case .week:
+            startDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        case .month:
+            startDate = calendar.date(byAdding: .month, value: -1, to: now) ?? now
+        case .all:
+            startDate = .distantPast
+        }
+        
+        var filteredFrequency: [Int: Int] = [:]
+        for (date, keyFreq) in keyboardMonitor.keyStats.dailyKeyFrequency {
+            if date >= startDate && date <= now {
+                for (key, count) in keyFreq {
+                    filteredFrequency[key, default: 0] += count
+                }
+            }
+        }
+        
+        let totalCount = filteredFrequency.values.reduce(0, +)
+        let uniqueKeys = filteredFrequency.keys.count
+        let mostUsedKey = filteredFrequency.max(by: { $0.value < $1.value })?.key ?? 0
+        
+        return (
+            totalCount: totalCount,
+            uniqueKeys: uniqueKeys,
+            mostUsedKey: keyboardMonitor.getKeyName(for: mostUsedKey)
+        )
+    }
+    
     var body: some View {
-        NavigationView {
-            Form {
-                Section {
+        VStack(spacing: 20) {
+            // 标题区域
+            HStack {
+                Text("导出数据")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.top)
+            
+            // 主要内容区域
+            VStack(spacing: 24) {
+                // 时间范围选择
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "clock")
+                            .foregroundColor(.blue)
+                        Text("选择时间范围")
+                            .font(.headline)
+                    }
+                    
+                    Picker("时间范围", selection: $selectedTimeRange) {
+                        ForEach(TimeRange.allCases, id: \.self) { range in
+                            Text(range.rawValue).tag(range)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                }
+                
+                // 导出格式选择
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "doc.text")
+                            .foregroundColor(.green)
+                        Text("导出格式")
+                            .font(.headline)
+                    }
+                    
                     Picker("导出格式", selection: $exportFormat) {
                         ForEach(ExportFormat.allCases, id: \.self) { format in
                             Text(format.rawValue).tag(format)
                         }
                     }
+                    .pickerStyle(SegmentedPickerStyle())
                 }
                 
-                Section {
-                    Button("导出数据") {
-                        exportData()
+                // 数据统计
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("数据统计")
+                        .font(.headline)
+                    
+                    VStack(spacing: 12) {
+                        StatCard(title: "总按键数", value: "\(timeRangeStats.totalCount)", icon: "keyboard", color: .blue)
+                        StatCard(title: "独特按键数", value: "\(timeRangeStats.uniqueKeys)", icon: "number", color: .green)
+                        StatCard(title: "最常用按键", value: timeRangeStats.mostUsedKey, icon: "star.fill", color: .yellow)
                     }
                 }
             }
-            .navigationTitle("导出数据")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("关闭") {
-                        dismiss()
-                    }
+            .padding()
+            .background(Color(.windowBackgroundColor))
+            
+            Spacer()
+            
+            // 底部按钮区域
+            HStack(spacing: 16) {
+                Button(action: { dismiss() }) {
+                    Text("关闭")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
                 }
+                .buttonStyle(.bordered)
+                
+                Button(action: exportData) {
+                    HStack {
+                        if isExporting {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        Text(isExporting ? "导出中..." : "导出数据")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isExporting)
             }
+            .padding()
+        }
+        .frame(width: 500)
+        .background(Color(.windowBackgroundColor))
+        .alert("导出结果", isPresented: $showAlert) {
+            Button("确定", role: .cancel) {}
+        } message: {
+            Text(alertMessage)
         }
     }
     
+    private func getStartDate() -> Date {
+        let now = Date()
+        let calendar = Calendar.current
+        
+        switch selectedTimeRange {
+        case .day:
+            return calendar.date(byAdding: .hour, value: -24, to: now) ?? now
+        case .week:
+            return calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        case .month:
+            return calendar.date(byAdding: .month, value: -1, to: now) ?? now
+        case .all:
+            return .distantPast
+        }
+    }
+    
+    private func prepareKeyFrequencyData(startDate: Date, endDate: Date) -> [KeyFrequencyData] {
+        var frequencyMap: [Int: Int] = [:]
+        
+        // 统计时间范围内的按键频率
+        for (date, keyFreq) in keyboardMonitor.keyStats.dailyKeyFrequency {
+            if date >= startDate && date <= endDate {
+                for (key, count) in keyFreq {
+                    frequencyMap[key, default: 0] += count
+                }
+            }
+        }
+        
+        // 转换为 KeyFrequencyData 数组并排序
+        return frequencyMap.map { key, count in
+            KeyFrequencyData(
+                keyCode: key,
+                keyName: keyboardMonitor.getKeyName(for: key),
+                count: count
+            )
+        }.sorted { $0.count > $1.count }
+    }
+    
     private func exportData() {
-        // 实现数据导出逻辑
+        // 获取所有按键数据并排序
+        let allKeyFrequency = prepareKeyFrequencyData(startDate: getStartDate(), endDate: Date())
+        let top10Keys = Array(allKeyFrequency.prefix(10))
+        
+        // 根据选择的格式生成内容
+        let content: String
+        if exportFormat == .txt {
+            content = generateTxtContent(stats: timeRangeStats, top10: top10Keys, allKeys: allKeyFrequency)
+        } else {
+            content = generateCsvContent(stats: timeRangeStats, top10: top10Keys, allKeys: allKeyFrequency)
+        }
+        
+        let tempFile: URL
+        do {
+            // 创建临时文件
+            tempFile = FileManager.default.temporaryDirectory
+                .appendingPathComponent("keyboard_stats")
+                .appendingPathExtension(exportFormat.rawValue.lowercased())
+            
+            // 写入内容
+            try content.write(to: tempFile, atomically: true, encoding: .utf8)
+            
+            // 分享文件
+            let controller = NSWorkspace.shared.activateFileViewerSelecting([tempFile])
+            
+            alertMessage = "文件已保存到临时目录"
+            showAlert = true
+        } catch {
+            alertMessage = "导出失败：\(error.localizedDescription)"
+            showAlert = true
+        }
+    }
+    
+    // 生成TXT格式内容
+    private func generateTxtContent(stats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String),
+                                  top10: [KeyFrequencyData],
+                                  allKeys: [KeyFrequencyData]) -> String {
+        var content = """
+        时间范围：\(selectedTimeRange.rawValue)
+        
+        统计概要：
+        总按键数：\(stats.totalCount)
+        独特按键数：\(stats.uniqueKeys)
+        最常用按键：\(stats.mostUsedKey)
+        
+        TOP 10 按键统计：
+        """
+        
+        // 添加TOP 10数据
+        for (index, key) in top10.enumerated() {
+            content += "\n\(index + 1). \(key.keyName): \(key.count)次"
+        }
+        
+        content += "\n\n所有按键统计："
+        
+        // 添加所有按键数据
+        for key in allKeys {
+            content += "\n\(key.keyName): \(key.count)次"
+        }
+        
+        return content
+    }
+    
+    // 生成CSV格式内容
+    private func generateCsvContent(stats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String),
+                                  top10: [KeyFrequencyData],
+                                  allKeys: [KeyFrequencyData]) -> String {
+        var content = """
+        数据类型,值
+        时间范围,\(selectedTimeRange.rawValue)
+        总按键数,\(stats.totalCount)
+        独特按键数,\(stats.uniqueKeys)
+        最常用按键,\(stats.mostUsedKey)
+        
+        TOP 10 按键统计
+        排名,按键,次数
+        """
+        
+        // 添加TOP 10数据
+        for (index, key) in top10.enumerated() {
+            content += "\n\(index + 1),\(key.keyName),\(key.count)"
+        }
+        
+        content += "\n\n所有按键统计"
+        content += "\n按键,次数"
+        
+        // 添加所有按键数据
+        for key in allKeys {
+            content += "\n\(key.keyName),\(key.count)"
+        }
+        
+        return content
+    }
+}
+
+// 修改统计行组件样式
+struct StatRow: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .frame(width: 30)
+                .font(.title2)
+            
+            Text(title)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+            
+            Text(value)
+                .bold()
+                .font(.title3)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(8)
+    }
+}
+
+// 导出数据模型
+struct ExportDataModel: Codable {
+    let timeRange: String
+    let exportDate: Date
+    let startDate: Date
+    let endDate: Date
+    let statistics: StatisticsData
+    let keyFrequency: [KeyFrequencyData]
+}
+
+struct StatisticsData: Codable {
+    let totalKeyCount: Int
+    let uniqueKeyCount: Int
+    let mostUsedKey: String
+}
+
+struct KeyFrequencyData: Codable {
+    let keyCode: Int
+    let keyName: String
+    let count: Int
+}
+
+// 确保 UTType 扩展可用
+extension UTType {
+    static var json: UTType {
+        UTType.json
+    }
+    
+    static var commaSeparatedText: UTType {
+        UTType("public.comma-separated-values-text") ?? .plainText
     }
 }
