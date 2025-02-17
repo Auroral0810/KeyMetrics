@@ -6,6 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @State private var showExportSuccess = false
     @State private var showClearAlert = false
+    @State private var showResetAlert = false
     @State private var autoStart = true
     @State private var showNotification = true
     @State private var backupInterval = 1 // 天
@@ -18,50 +19,65 @@ struct SettingsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 28) {
                 // 常规设置
                 SettingSection(title: "常规", icon: "gear") {
-                    SettingToggleRow(title: "开机自启动", isOn: $autoStart)
-                    SettingToggleRow(title: "显示通知", isOn: $showNotification)
-                    SettingPickerRow(title: "语言", selection: $selectedLanguage, options: languages)
-                    SettingPickerRow(title: "字体", selection: $selectedFont, options: fonts)
+                    VStack(spacing: 16) {
+                        SettingToggleRow(title: "开机自启动", isOn: $autoStart)
+                            .padding(.horizontal, 4)
+                        
+                        Divider()
+                        
+                        SettingPickerRow(title: "语言", selection: $selectedLanguage, options: languages)
+                            .padding(.horizontal, 4)
+                        
+                        Divider()
+                        
+                        SettingPickerRow(title: "字体", selection: $selectedFont, options: fonts)
+                            .padding(.horizontal, 4)
+                    }
                 }
                 
                 // 外观设置
                 SettingSection(title: "外观", icon: "paintbrush.fill") {
-                    SettingToggleRow(title: "深色模式", isOn: $themeManager.isDarkMode)
-                    ColorThemeSelector()
-                }
-                
-                // 性能设置
-                SettingSection(title: "性能", icon: "speedometer") {
-                    SettingToggleRow(title: "后台统计", isOn: .constant(true))
-                    SettingToggleRow(title: "按键音效", isOn: $keySoundEnabled)
-                    SettingSliderRow(title: "历史记录保留", value: .constant(30), range: 7...90, unit: "天")
+                    VStack(spacing: 16) {
+                        SettingToggleRow(title: "深色模式", isOn: $themeManager.isDarkMode)
+                            .padding(.horizontal, 4)
+                        
+                        Divider()
+                        
+                        ColorThemeSelector()
+                            .padding(.horizontal, 4)
+                    }
                 }
                 
                 // 数据管理
                 SettingSection(title: "数据管理", icon: "externaldrive.fill") {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 24) {
                         // 备份设置
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("自动备份")
+                                .font(.subheadline)
                                 .foregroundColor(.gray)
-                            HStack {
+                            
+                            HStack(spacing: 20) {
                                 Picker("间隔", selection: $backupInterval) {
                                     Text("每天").tag(1)
                                     Text("每3天").tag(3)
                                     Text("每周").tag(7)
                                 }
                                 .pickerStyle(.segmented)
+                                .frame(maxWidth: .infinity)
                                 
-                                Toggle("", isOn: .constant(true))
+                                Toggle("", isOn: $showNotification)
                                     .labelsHidden()
                             }
                         }
                         
+                        Divider()
+                        
                         // 数据操作按钮
-                        HStack(spacing: 16) {
+                        HStack(spacing: 20) {
                             DataButton(
                                 title: "导出数据",
                                 icon: "square.and.arrow.up.fill",
@@ -87,21 +103,21 @@ struct SettingsView: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 12)
                 }
                 
                 // 高级设置
                 SettingSection(title: "高级", icon: "wrench.and.screwdriver.fill") {
-                    SettingToggleRow(title: "开发者模式", isOn: .constant(false))
-                    SettingButton(title: "导出日志", icon: "doc.text.fill") {
-                        // TODO: 实现日志导出
+                    Button(action: { showResetAlert = true }) {
+                        HStack {
+                            Label("重置所有设置", systemImage: "arrow.counterclockwise")
+                            Spacer()
+                        }
                     }
-                    SettingButton(title: "重置所有设置", icon: "arrow.counterclockwise") {
-                        // TODO: 实现重置逻辑
-                    }
+                    .padding(.horizontal, 4)
                 }
             }
-            .padding(20)
+            .padding(24)
         }
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         .alert("确认清除", isPresented: $showClearAlert) {
@@ -109,6 +125,12 @@ struct SettingsView: View {
             Button("确认", role: .destructive) { clearData() }
         } message: {
             Text("此操作将清除所有数据且无法恢复，是否继续？")
+        }
+        .alert("确认重置", isPresented: $showResetAlert) {
+            Button("取消", role: .cancel) { }
+            Button("确认", role: .destructive) { resetAllSettings() }
+        } message: {
+            Text("此操作将重置所有设置为默认值，是否继续？")
         }
         .alert("导出成功", isPresented: $showExportSuccess) {
             Button("确定", role: .cancel) { }
@@ -125,6 +147,26 @@ struct SettingsView: View {
         keyboardMonitor.keyStats = KeyStats()
         UserDefaults.standard.removeObject(forKey: "keyStats")
         showClearAlert = false
+    }
+    
+    private func resetAllSettings() {
+        // 重置所有设置为默认值
+        autoStart = true
+        showNotification = true
+        backupInterval = 1
+        keySoundEnabled = false
+        selectedLanguage = "简体中文"
+        selectedFont = "系统默认"
+        themeManager.isDarkMode = true
+        
+        // 保存默认设置到 UserDefaults
+        UserDefaults.standard.set(true, forKey: "autoStart")
+        UserDefaults.standard.set(true, forKey: "showNotification")
+        UserDefaults.standard.set(1, forKey: "backupInterval")
+        UserDefaults.standard.set(false, forKey: "keySoundEnabled")
+        UserDefaults.standard.set("简体中文", forKey: "selectedLanguage")
+        UserDefaults.standard.set("系统默认", forKey: "selectedFont")
+        UserDefaults.standard.set(true, forKey: "isDarkMode")
     }
 }
 
@@ -228,18 +270,34 @@ struct DataButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.title2)
+                    .foregroundColor(color)
                 Text(title)
-                    .font(.caption)
+                    .font(.callout)
+                    .foregroundColor(.primary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(color.opacity(0.1))
-            .foregroundColor(color)
-            .cornerRadius(10)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(color.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(color.opacity(0.2), lineWidth: 1)
+                    )
+            )
         }
+        .buttonStyle(ScaleButtonStyle())
+    }
+}
+
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .animation(.easeInOut(duration: 0.2), value: configuration.isPressed)
     }
 }
 
