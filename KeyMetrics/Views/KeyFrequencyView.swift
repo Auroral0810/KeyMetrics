@@ -301,23 +301,48 @@ struct LineChart: View {
     var body: some View {
         Chart {
             ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
+                // 添加线条
                 LineMark(
                     x: .value("Index", index),
                     y: .value("Count", item.count)
                 )
                 .foregroundStyle(by: .value("Key", item.key))
-                .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.catmullRom) // 使用 catmullRom 插值方法
                 
+                // 添加点
                 PointMark(
                     x: .value("Index", index),
                     y: .value("Count", item.count)
                 )
                 .foregroundStyle(by: .value("Key", item.key))
-                .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+                .symbolSize(30)
+                
+                // 添加数值标签
+                if hoveredKey == item.key {
+                    PointMark(
+                        x: .value("Index", index),
+                        y: .value("Count", item.count)
+                    )
+                    .foregroundStyle(by: .value("Key", item.key))
+                    .annotation {
+                        Text("\(item.count)")
+                            .font(.caption)
+                            .padding(4)
+                            .background(.background.opacity(0.9))
+                            .cornerRadius(4)
+                    }
+                }
             }
         }
         .frame(height: 300)
         .chartLegend(position: .bottom)
+        .chartYAxis {
+            AxisMarks(position: .leading)
+        }
+        .chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: data.count))
+        }
     }
 }
 
