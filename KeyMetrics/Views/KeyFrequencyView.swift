@@ -6,12 +6,29 @@ struct KeyFrequencyView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedTimeRange: TimeRange = .day
     @State private var showingExportSheet = false
+    @State private var hoveredKey: String? = nil
+    @State private var selectedChartType: ChartType = .donut
     
     enum TimeRange: String, CaseIterable {
         case day = "24小时"
         case week = "本周"
         case month = "本月"
         case all = "全部"
+        
+        var description: String {
+            switch self {
+            case .day: return "24小时内"
+            case .week: return "本周"
+            case .month: return "本月"
+            case .all: return "全部时间"
+            }
+        }
+    }
+    
+    enum ChartType: String, CaseIterable {
+        case donut = "环形图"
+        case bar = "柱状图"
+        case line = "趋势图"
     }
     
     var sortedKeyFrequency: [(key: String, count: Int)] {
@@ -20,100 +37,271 @@ struct KeyFrequencyView: View {
             .sorted { $0.count > $1.count }
     }
     
+    var timeRangeStats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String) {
+        let now = Date()
+        let calendar = Calendar.current
+        
+        let startDate: Date
+        switch selectedTimeRange {
+        case .day:
+            startDate = calendar.date(byAdding: .hour, value: -24, to: now) ?? now
+        case .week:
+            startDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        case .month:
+            startDate = calendar.date(byAdding: .month, value: -1, to: now) ?? now
+        case .all:
+            startDate = .distantPast
+        }
+        
+        let filteredData = sortedKeyFrequency.prefix(10)
+        let topKey = filteredData.first?.key ?? "-"
+        
+        return (
+            totalCount: filteredData.reduce(0) { $0 + $1.count },
+            uniqueKeys: filteredData.count,
+            mostUsedKey: topKey
+        )
+    }
+    
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // 顶部控制栏
-                HStack {
-                    Picker("时间范围", selection: $selectedTimeRange) {
-                        ForEach(TimeRange.allCases, id: \.self) { range in
-                            Text(range.rawValue).tag(range)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    
-                    Spacer()
-                    
-                    Button(action: { showingExportSheet = true }) {
-                        Label("导出数据", systemImage: "square.and.arrow.up")
+        VStack(spacing: 20) {
+            // 顶部控制栏
+            HStack {
+                Picker("时间范围", selection: $selectedTimeRange) {
+                    ForEach(TimeRange.allCases, id: \.self) { range in
+                        Text(range.rawValue).tag(range)
                     }
                 }
-                .padding()
-                .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
-                .cornerRadius(16)
+                .pickerStyle(SegmentedPickerStyle())
                 
-                // 键位分布环形图
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("键位分布")
-                        .font(.headline)
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                    
-                    Chart {
-                        ForEach(sortedKeyFrequency.prefix(10), id: \.key) { item in
-                            SectorMark(
-                                angle: .value("Count", item.count),
-                                innerRadius: .ratio(0.6),
-                                angularInset: 1.5
-                            )
-                            .foregroundStyle(by: .value("Key", item.key))
-                        }
-                    }
-                    .frame(height: 300)
-                }
-                .padding()
-                .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
-                .cornerRadius(16)
+                Spacer()
                 
-                // 按键频率排行
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("按键频率排行")
-                        .font(.headline)
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                    
-                    VStack(spacing: 12) {
-                        ForEach(sortedKeyFrequency.prefix(10), id: \.key) { item in
-                            HStack {
-                                Text(item.key)
-                                    .font(.system(.body, design: .monospaced))
-                                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                                    .frame(width: 80, alignment: .leading)
-                                
-                                GeometryReader { geometry in
-                                    ZStack(alignment: .leading) {
-                                        Rectangle()
-                                            .fill(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode).opacity(0.2))
-                                        
-                                        Rectangle()
-                                            .fill(ThemeManager.ThemeColors.chartColors[0])
-                                            .frame(width: getBarWidth(count: item.count, maxCount: sortedKeyFrequency[0].count, totalWidth: geometry.size.width))
-                                    }
-                                }
-                                .frame(height: 24)
-                                .cornerRadius(4)
-                                
-                                Text("\(item.count)")
-                                    .font(.system(.body, design: .monospaced))
-                                    .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
-                                    .frame(width: 60, alignment: .trailing)
-                            }
-                        }
+                Picker("图表类型", selection: $selectedChartType) {
+                    ForEach(ChartType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
                     }
                 }
-                .padding()
-                .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
-                .cornerRadius(16)
+                .pickerStyle(SegmentedPickerStyle())
+                
+                Button(action: { showingExportSheet = true }) {
+                    Label("导出", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(.bordered)
             }
             .padding()
+            .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
+            .cornerRadius(12)
+            
+            HStack(spacing: 20) {
+                // 左侧统计卡片，使用时间范围统计数据
+                VStack(spacing: 16) {
+                    StatCard(
+                        title: "\(selectedTimeRange.rawValue)总按键",
+                        value: "\(timeRangeStats.totalCount)",
+                        icon: "keyboard",
+                        color: .blue
+                    )
+                    
+                    StatCard(
+                        title: "\(selectedTimeRange.rawValue)独特按键",
+                        value: "\(timeRangeStats.uniqueKeys)",
+                        icon: "number",
+                        color: .green
+                    )
+                    
+                    StatCard(
+                        title: "\(selectedTimeRange.rawValue)最常用",
+                        value: timeRangeStats.mostUsedKey,
+                        icon: "star",
+                        color: .yellow
+                    )
+                }
+                .frame(width: 200)
+                
+                // 主图表区域
+                VStack {
+                    switch selectedChartType {
+                    case .donut:
+                        DonutChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
+                    case .bar:
+                        BarChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
+                    case .line:
+                        LineChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                
+                // 右侧排行榜
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("TOP 10 按键")
+                        .font(.headline)
+                    
+                    // 获取实际的按键数据
+                    let actualData = sortedKeyFrequency.prefix(10)
+                    // 计算需要填充的占位符数量
+                    let placeholderCount = 10 - actualData.count
+                    
+                    // 显示实际数据
+                    ForEach(Array(actualData.enumerated()), id: \.element.key) { index, item in
+                        RankingRow(
+                            rank: index + 1,
+                            key: item.key,
+                            count: item.count,
+                            total: sortedKeyFrequency.first?.count ?? 1,
+                            isHovered: hoveredKey == item.key
+                        )
+                        .onHover { isHovered in
+                            hoveredKey = isHovered ? item.key : nil
+                        }
+                    }
+                    
+                    // 显示占位符
+                    ForEach(0..<placeholderCount, id: \.self) { index in
+                        RankingRow(
+                            rank: actualData.count + index + 1,
+                            key: "-",
+                            count: 0,
+                            total: sortedKeyFrequency.first?.count ?? 1,
+                            isHovered: false
+                        )
+                        .opacity(0.3)  // 降低占位符的透明度
+                    }
+                }
+                .frame(width: 250)
+            }
         }
+        .padding()
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         .sheet(isPresented: $showingExportSheet) {
             ExportView()
         }
     }
+}
+
+// 统计卡片组件
+struct StatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
     
-    private func getBarWidth(count: Int, maxCount: Int, totalWidth: CGFloat) -> CGFloat {
-        let ratio = Double(count) / Double(maxCount)
-        return totalWidth * CGFloat(ratio)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: icon)
+                .foregroundColor(.gray)
+            
+            Text(value)
+                .font(.title2)
+                .bold()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(color.opacity(0.1))
+        .cornerRadius(12)
+    }
+}
+
+// 排行榜行组件
+struct RankingRow: View {
+    let rank: Int
+    let key: String
+    let count: Int
+    let total: Int
+    let isHovered: Bool
+    
+    var body: some View {
+        HStack {
+            Text("\(rank)")
+                .font(.system(.body, design: .rounded))
+                .bold()
+                .foregroundColor(.gray)
+                .frame(width: 30)
+            
+            Text(key)
+                .font(.system(.body, design: .monospaced))
+            
+            Spacer()
+            
+            Text(count > 0 ? "\(count)" : "-")
+                .font(.system(.body, design: .monospaced))
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .frame(height: 36)  // 添加固定高度
+        .background(isHovered ? Color.blue.opacity(0.1) : Color.clear)
+        .cornerRadius(8)
+        .animation(.easeInOut(duration: 0.2), value: isHovered)
+    }
+}
+
+// 环形图组件
+struct DonutChart: View {
+    let data: ArraySlice<(key: String, count: Int)>
+    @Binding var hoveredKey: String?
+    
+    var body: some View {
+        Chart {
+            ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
+                SectorMark(
+                    angle: .value("Count", item.count),
+                    innerRadius: .ratio(0.6),
+                    angularInset: 1.5
+                )
+                .foregroundStyle(by: .value("Key", item.key))
+                .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+            }
+        }
+        .frame(height: 300)
+        .chartLegend(position: .bottom)
+    }
+}
+
+// 柱状图组件
+struct BarChart: View {
+    let data: ArraySlice<(key: String, count: Int)>
+    @Binding var hoveredKey: String?
+    
+    var body: some View {
+        Chart {
+            ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
+                BarMark(
+                    x: .value("Key", item.key),
+                    y: .value("Count", item.count)
+                )
+                .foregroundStyle(by: .value("Key", item.key))
+                .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+            }
+        }
+        .frame(height: 300)
+        .chartLegend(position: .bottom)
+    }
+}
+
+// 趋势图组件
+struct LineChart: View {
+    let data: ArraySlice<(key: String, count: Int)>
+    @Binding var hoveredKey: String?
+    
+    var body: some View {
+        Chart {
+            ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
+                LineMark(
+                    x: .value("Index", index),
+                    y: .value("Count", item.count)
+                )
+                .foregroundStyle(by: .value("Key", item.key))
+                .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+                
+                PointMark(
+                    x: .value("Index", index),
+                    y: .value("Count", item.count)
+                )
+                .foregroundStyle(by: .value("Key", item.key))
+                .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+            }
+        }
+        .frame(height: 300)
+        .chartLegend(position: .bottom)
     }
 }
 
