@@ -7,5 +7,13 @@
     <string>KeyMetrics需要访问键盘输入以统计按键次数。</string>
     <key>Privacy - Accessibility Usage Description</key>
     <string>KeyMetrics需要辅助功能权限来统计键盘输入。</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+    <string>en</string>
+    <string>zh-Hans</string>
+    <string>ja</string>
+    <string>zh-Hant</string>
+    <string>ko</string>
+    </array>
 </dict>
 </plist> 

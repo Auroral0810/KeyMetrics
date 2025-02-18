@@ -4,6 +4,7 @@ import Charts
 struct DashboardView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     
     var body: some View {
         ScrollView {
@@ -11,7 +12,7 @@ struct DashboardView: View {
                 // 顶部统计卡片
                 HStack(spacing: 20) {
                     StatCardView(
-                        title: "累计按键",
+                        title: languageManager.localizedString("Total Keystrokes"),
                         value: "\(keyboardMonitor.keyStats.totalCount)",
                         icon: "keyboard",
                         color: ThemeManager.ThemeColors.chartColors[0]
@@ -19,7 +20,7 @@ struct DashboardView: View {
                     .frame(height: 120)
                     
                     StatCardView(
-                        title: "今日按键",
+                        title: languageManager.localizedString("Today's Keystrokes"),
                         value: "\(getTodayKeyCount())",
                         icon: "clock",
                         color: ThemeManager.ThemeColors.chartColors[1]
@@ -42,14 +43,14 @@ struct DashboardView: View {
                 // 准确率统计
                 HStack(spacing: 20) {
                     AccuracyCardView(
-                        title: "历史准确率",
+                        title: languageManager.localizedString("Historical Accuracy"),
                         accuracy: getHistoricalAccuracy(),
                         color: ThemeManager.ThemeColors.chartColors[2]
                     )
                     .frame(height: 120)
                     
                     AccuracyCardView(
-                        title: "近1小时准确率",
+                        title: languageManager.localizedString("Last Hour Accuracy"),
                         accuracy: getHourlyAccuracy(),
                         color: ThemeManager.ThemeColors.chartColors[3]
                     )
@@ -103,6 +104,7 @@ struct DashboardView: View {
 // 修改 StatCardView 使其更紧凑
 struct StatCardView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let title: String
     let value: String
     let icon: String
@@ -133,6 +135,7 @@ struct StatCardView: View {
 // 改进的速度计视图 - 更紧凑的布局
 struct SpeedMeterView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let currentSpeed: Double
     
     // 根据速度计算颜色
@@ -152,7 +155,7 @@ struct SpeedMeterView: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            Text("实时击键速度")
+            Text(languageManager.localizedString("Real-time Typing Speed"))
                 .font(.subheadline)
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
@@ -180,7 +183,7 @@ struct SpeedMeterView: View {
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(getSpeedColor())
                         .animation(.easeInOut(duration: 0.3), value: currentSpeed)
-                    Text("次/分钟")
+                    Text(languageManager.localizedString("KPM"))
                         .font(.caption)
                         .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                 }
@@ -195,6 +198,7 @@ struct SpeedMeterView: View {
 // 新增的准确率卡片视图
 struct AccuracyCardView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let title: String
     let accuracy: Double
     let color: Color
@@ -290,6 +294,7 @@ extension View {
 // 键盘热力图视图
 struct KeyboardHeatMapView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let keyStats: KeyStats
     
     // 修改键盘布局数据，为重复按键添加唯一标识符
@@ -370,7 +375,7 @@ struct KeyboardHeatMapView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                Text("键盘负荷分布")
+                Text(languageManager.localizedString("Keyboard Load Distribution"))
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     .padding(.bottom, 0)

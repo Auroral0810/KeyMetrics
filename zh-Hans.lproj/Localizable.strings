@@ -1,0 +1,181 @@
+/*
+  Localizable.strings
+  KeyMetrics
+
+  Created by 俞云烽 on 2025/02/18.
+  
+*/
+
+"Settings" = "设置";
+"General" = "常规";
+"Appearance" = "外观";
+"Language" = "语言";
+"Dark Mode" = "深色模式";
+"Auto Start" = "开机自启动";
+"Font" = "字体";
+"System Default" = "系统默认";
+"Follow System" = "跟随系统";
+"Total Keystrokes" = "累计按键";
+"Unique Keys" = "独特按键";
+"Key Distribution" = "按键分布";
+"Usage Trend" = "使用趋势";
+"Close" = "关闭";
+"Today" = "今天";
+"Yesterday" = "昨天";
+"Last 7 Days" = "近7天";
+"Last 30 Days" = "近30天";
+"All Time" = "全部时间";
+"Statistics" = "统计";
+"History" = "历史";
+"About" = "关于";
+"Version" = "版本";
+"Feedback" = "反馈";
+"Clear Data" = "清除数据";
+"Are you sure?" = "确定要清除吗？";
+"This action cannot be undone" = "此操作无法撤销。";
+"Cancel" = "取消";
+"Confirm" = "确定";
+"Data Management" = "数据管理";
+"Auto Backup" = "自动备份";
+"Interval" = "间隔";
+"Daily" = "每天";
+"Every 3 Days" = "每3天";
+"Weekly" = "每周";
+"Export Data" = "导出数据";
+"Import Data" = "导入数据";
+"Advanced" = "高级";
+"Reset All Settings" = "重置所有设置";
+"Confirm Clear" = "确认清除";
+"Confirm Reset" = "确认重置";
+"Reset settings confirmation message" = "此操作将重置所有设置为默认值，是否继续？";
+"Export Success" = "导出成功";
+"OK" = "确定";
+"Theme Color" = "主题色";
+"System Default" = "系统默认";
+"SF Pro" = "SF Pro";
+"Helvetica Neue" = "Helvetica Neue";
+"Monaco" = "Monaco";
+"Simplified Chinese" = "简体中文";
+"English" = "英语";
+"Japanese" = "日语";
+"Traditional Chinese" = "繁体中文";
+"Korean" = "韩语";
+"Default Theme" = "默认主题";
+"Ocean Theme" = "海洋主题";
+"Forest Theme" = "森林主题";
+"Sunset Theme" = "日落主题";
+"App Description" = "KeyMetrics 是一款专业的键盘输入分析工具，致力于帮助用户了解和改善自己的打字习惯。通过实时监测和数据分析，为用户提供全面的键盘使用报告。";
+"Developer Info" = "开发者信息";
+"Name" = "姓名";
+"Developer Name" = "俞云烽";
+"GitHub" = "开源地址";
+"Email" = "邮箱";
+"All rights reserved" = "保留所有权利";
+"Build with" = "用";
+"by" = "制作，由";
+
+// 技术栈
+"UI Framework" = "用户界面框架";
+"Data Persistence" = "数据持久化";
+"Reactive Programming" = "响应式编程";
+"Data Visualization" = "数据可视化";
+"Native App" = "原生应用";
+
+// 功能特点
+"Features" = "功能特点";
+"Real-time Monitoring" = "实时监测";
+"Record Every Keystroke" = "精确记录每一次按键";
+"Full Keyboard Capture" = "全键盘按键捕获";
+"Keystroke Frequency Stats" = "按键频率统计";
+"Shortcut Recognition" = "组合键识别";
+
+"Data Analysis" = "数据分析";
+"Comprehensive Reports" = "全面的统计报告";
+"Daily Usage Statistics" = "每日使用时长统计";
+"Common Key Distribution" = "常用按键分布";
+"Efficiency Trend Analysis" = "效率趋势分析";
+
+"Performance Optimization" = "性能优化";
+"Low System Usage" = "极低的系统占用";
+"Background Silent Running" = "后台静默运行";
+"Memory Usage <50MB" = "内存占用<50MB";
+"Low CPU Usage" = "低CPU使用率";
+
+"Privacy Protection" = "隐私保护";
+"Local Data Storage" = "本地数据存储";
+"No Network Communication" = "无网络通信";
+"Local Data Encryption" = "数据本地加密";
+"Secure Backup Mechanism" = "安全备份机制";
+
+// 仪表盘
+"Today's Keystrokes" = "今日按键";
+"Real-time Typing Speed" = "实时击键速度";
+"KPM" = "次/分钟";
+"Historical Accuracy" = "历史准确率";
+"Last Hour Accuracy" = "近1小时准确率";
+"Keyboard Load Distribution" = "键盘负荷分布";
+
+// 键频统计
+"Frequency" = "频率";
+"Key" = "按键";
+"Times" = "次数";
+"Export Data" = "导出数据";
+
+// 导出视图
+"Select Time Range" = "选择时间范围";
+"Time Range" = "时间范围";
+"Last 24 Hours" = "最近24小时";
+"This Week" = "本周";
+"This Month" = "本月";
+"All Time" = "全部时间";
+"Export Format" = "导出格式";
+"Format" = "格式";
+"Text File" = "文本文件";
+"CSV File" = "CSV文件";
+"Statistics" = "数据统计";
+"Total Keys" = "总按键数";
+"Unique Keys" = "独特按键数";
+"Most Used Key" = "最常用按键";
+"Close" = "关闭";
+"Exporting..." = "导出中...";
+"Statistics Summary" = "统计概要";
+"TOP 10 Keys Statistics" = "TOP 10 按键统计";
+"All Keys Statistics" = "所有按键统计";
+"Data Type" = "数据类型";
+"Value" = "值";
+"Rank" = "排名";
+"Export" = "导出";
+"File saved to temporary directory" = "文件已保存到临时目录";
+"Export failed" = "导出失败";
+
+"Chart Type" = "图表类型";
+"Donut Chart" = "环形图";
+"Bar Chart" = "柱状图";
+"Line Chart" = "折线图";
+"TOP 10 Keys" = "TOP 10 按键";
+"Times Format" = "%d 次";
+"%@ Total" = "%@总计按键数";
+"%@ Unique" = "%@独特按键数";
+"%@ Most Used" = "%@最常用按键";
+"Others" = "其他";
+
+// 统计卡片
+"Last 24 Hours Total" = "最近24小时总计按键数";
+"Last 24 Hours Unique"  = "最近24小时独特按键数";
+"Last 24 Hours Most Used" = "最近24小时最常用按键";
+
+//年月日
+"Day" = "日";
+"Week" = "周";
+"Month" = "月";
+"Year" = "年";
+
+"Tech Stack" = "技术栈";
+
+"Accessibility Permission Required" = "需要辅助功能权限才能统计键盘输入";
+"Grant Permission" = "授予权限";
+"Dashboard" = "仪表盘";
+"Key Analysis" = "按键分析";
+"History" = "历史记录";
+"Settings" = "设置";
+"About" = "关于我们";

@@ -1,0 +1,181 @@
+/* 
+  Localizable.strings
+  KeyMetrics
+
+  Created by 俞云烽 on 2025/02/18.
+  
+*/
+
+"Settings" = "설정";
+"General" = "일반";
+"Appearance" = "외관";
+"Language" = "언어";
+"Dark Mode" = "다크 모드";
+"Auto Start" = "자동 시작";
+"Font" = "글꼴";
+"System Default" = "시스템 기본값";
+"Follow System" = "시스템 설정 따르기";
+"Total Keystrokes" = "총 키스트로크";
+"Unique Keys" = "고유 키";
+"Key Distribution" = "키 분포";
+"Usage Trend" = "사용 추세";
+"Close" = "닫기";
+"Today" = "오늘";
+"Yesterday" = "어제";
+"Last 7 Days" = "최근 7일";
+"Last 30 Days" = "최근 30일";
+"All Time" = "전체 기간";
+"Statistics" = "통계";
+"History" = "기록";
+"About" = "정보";
+"Version" = "버전";
+"Feedback" = "피드백";
+"Clear Data" = "데이터 지우기";
+"Are you sure?" = "정말 지우시겠습니까?";
+"This action cannot be undone" = "이 작업은 취소할 수 없습니다.";
+"Cancel" = "취소";
+"Confirm" = "확인";
+"Data Management" = "데이터 관리";
+"Auto Backup" = "자동 백업";
+"Interval" = "간격";
+"Daily" = "매일";
+"Every 3 Days" = "3일마다";
+"Weekly" = "매주";
+"Export Data" = "데이터 내보내기";
+"Import Data" = "데이터 가져오기";
+"Advanced" = "고급";
+"Reset All Settings" = "모든 설정 초기화";
+"Confirm Clear" = "지우기 확인";
+"Confirm Reset" = "초기화 확인";
+"Reset settings confirmation message" = "모든 설정이 기본값으로 초기화됩니다. 계속하시겠습니까?";
+"Export Success" = "내보내기 성공";
+"OK" = "확인";
+"Theme Color" = "테마 색상";
+"System Default" = "시스템 기본값";
+"SF Pro" = "SF Pro";
+"Helvetica Neue" = "Helvetica Neue";
+"Monaco" = "Monaco";
+"Simplified Chinese" = "간체 중국어";
+"English" = "영어";
+"Japanese" = "일본어";
+"Traditional Chinese" = "번체 중국어";
+"Korean" = "한국어";
+"Default Theme" = "기본 테마";
+"Ocean Theme" = "바다 테마";
+"Forest Theme" = "숲 테마";
+"Sunset Theme" = "일몰 테마";
+"App Description" = "KeyMetrics는 전문적인 키보드 입력 분석 도구로, 사용자의 타이핑 습관을 이해하고 개선하는 데 도움을 주기 위해 노력합니다. 실시간 모니터링과 데이터 분석을 통해 사용자에게 종합적인 키보드 사용 보고서를 제공합니다.";
+"Developer Info" = "개발자 정보";
+"Name" = "이름";
+"Developer Name" = "俞云烽";
+"GitHub" = "GitHub";
+"Email" = "이메일";
+"All rights reserved" = "모든 권리 보유";
+"Build with" = "제작:";
+"by" = "by";
+
+// 技术栈
+"UI Framework" = "UI 프레임워크";
+"Data Persistence" = "데이터 영속성";
+"Reactive Programming" = "반응형 프로그래밍";
+"Data Visualization" = "데이터 시각화";
+"Native App" = "네이티브 앱";
+
+// 功能特点
+"Features" = "기능";
+"Real-time Monitoring" = "실시간 모니터링";
+"Record Every Keystroke" = "모든 키스트로크 기록";
+"Full Keyboard Capture" = "전체 키보드 캡처";
+"Keystroke Frequency Stats" = "키스트로크 빈도 통계";
+"Shortcut Recognition" = "단축키 인식";
+
+"Data Analysis" = "데이터 분석";
+"Comprehensive Reports" = "종합 보고서";
+"Daily Usage Statistics" = "일일 사용 통계";
+"Common Key Distribution" = "일반 키 분포";
+"Efficiency Trend Analysis" = "효율성 추세 분석";
+
+"Performance Optimization" = "성능 최적화";
+"Low System Usage" = "낮은 시스템 사용률";
+"Background Silent Running" = "백그라운드 무음 실행";
+"Memory Usage <50MB" = "메모리 사용량 <50MB";
+"Low CPU Usage" = "낮은 CPU 사용률";
+
+"Privacy Protection" = "개인정보 보호";
+"Local Data Storage" = "로컬 데이터 저장";
+"No Network Communication" = "네트워크 통신 없음";
+"Local Data Encryption" = "로컬 데이터 암호화";
+"Secure Backup Mechanism" = "안전한 백업 메커니즘";
+
+// 仪表盘
+"Today's Keystrokes" = "오늘의 키스트로크";
+"Real-time Typing Speed" = "실시간 타이핑 속도";
+"KPM" = "KPM";
+"Historical Accuracy" = "전체 정확도";
+"Last Hour Accuracy" = "최근 1시간 정확도";
+"Keyboard Load Distribution" = "키보드 부하 분포";
+
+// 键频统计
+"Frequency" = "빈도";
+"Key" = "키";
+"Times" = "횟수";
+"Export Data" = "데이터 내보내기";
+
+// 导出视图
+"Select Time Range" = "기간 선택";
+"Time Range" = "기간";
+"Last 24 Hours" = "최근 24시간";
+"This Week" = "이번 주";
+"This Month" = "이번 달";
+"All Time" = "전체 기간";
+"Export Format" = "내보내기 형식";
+"Format" = "형식";
+"Text File" = "텍스트 파일";
+"CSV File" = "CSV 파일";
+"Statistics" = "통계";
+"Total Keys" = "총 키 수";
+"Unique Keys" = "고유 키 수";
+"Most Used Key" = "가장 많이 사용된 키";
+"Close" = "닫기";
+"Exporting..." = "내보내는 중...";
+"Statistics Summary" = "통계 요약";
+"TOP 10 Keys Statistics" = "상위 10개 키 통계";
+"All Keys Statistics" = "전체 키 통계";
+"Data Type" = "데이터 유형";
+"Value" = "값";
+"Rank" = "순위";
+"Export" = "내보내기";
+"File saved to temporary directory" = "임시 디렉토리에 파일 저장됨";
+"Export failed" = "내보내기 실패";
+
+"Chart Type" = "차트 유형";
+"Donut Chart" = "도넛 차트";
+"Bar Chart" = "막대 차트";
+"Line Chart" = "선 차트";
+"TOP 10 Keys" = "상위 10개 키";
+"Times Format" = "%d회";
+"%@ Total" = "%@ 전체";
+"%@ Unique" = "%@ 고유";
+"%@ Most Used" = "%@ 최다 사용";
+"Others" = "기타";
+
+// 统计卡片
+"Last 24 Hours Total" = "최근 24시간 총 키 수";
+"Last 24 Hours Unique" = "최근 24시간 고유 키 수";
+"Last 24 Hours Most Used" = "최근 24시간 최다 사용 키";
+
+//年月日
+"Day" = "일";
+"Week" = "주";
+"Month" = "월";
+"Year" = "년";
+
+"Tech Stack" = "기술 스택";
+
+"Accessibility Permission Required" = "키보드 입력을 모니터링하려면 접근성 권한이 필요합니다";
+"Grant Permission" = "권한 부여";
+"Dashboard" = "대시보드";
+"Key Analysis" = "키 분석";
+"History" = "기록";
+"Settings" = "설정";
+"About" = "정보";

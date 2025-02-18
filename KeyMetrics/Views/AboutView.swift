@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AboutView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     
     var body: some View {
         ScrollView {
@@ -17,7 +18,7 @@ struct AboutView: View {
                         VStack(alignment: .leading) {
                             Text("KeyMetrics")
                                 .font(.system(size: 32, weight: .bold))
-                            Text("版本 1.0.0")
+                            Text(languageManager.localizedString("Version") + " 1.0.0")
                                 .foregroundColor(.gray)
                         }
                     }
@@ -27,7 +28,7 @@ struct AboutView: View {
                         HStack {
                             Image(systemName: "info.circle.fill")
                                 .foregroundColor(.blue)
-                            Text("KeyMetrics 是一款专业的键盘输入分析工具，致力于帮助用户了解和改善自己的打字习惯。通过实时监测和数据分析，为用户提供全面的键盘使用报告。")
+                            Text(languageManager.localizedString("App Description"))
                                 .lineSpacing(4)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -43,7 +44,7 @@ struct AboutView: View {
                             HStack {
                                 Image(systemName: "person.circle.fill")
                                     .foregroundColor(.blue)
-                                Text("开发者信息")
+                                Text(languageManager.localizedString("Developer Info"))
                                     .font(.headline)
                             }
                             
@@ -59,10 +60,29 @@ struct AboutView: View {
                                 
                                 // 联系信息
                                 VStack(alignment: .leading, spacing: 10) {
-                                    InfoRow(icon: "person.fill", label: "姓名", text: "俞云烽")
-                                    InfoRow(icon: "link", label: "开源地址", text: "github.com/Auroral0810", isLink: true)
-                                    InfoRow(icon: "message.fill", label: "QQ", text: "1957689514", copyable: true)
-                                    InfoRow(icon: "envelope.fill", label: "邮箱", text: "15968588744@163.com", copyable: true)
+                                    InfoRow(
+                                        icon: "person.fill",
+                                        label: languageManager.localizedString("Name"),
+                                        text: languageManager.localizedString("Developer Name")
+                                    )
+                                    InfoRow(
+                                        icon: "link",
+                                        label: languageManager.localizedString("GitHub"),
+                                        text: "github.com/Auroral0810",
+                                        isLink: true
+                                    )
+                                    InfoRow(
+                                        icon: "message.fill",
+                                        label: "QQ",
+                                        text: "1957689514",
+                                        copyable: true
+                                    )
+                                    InfoRow(
+                                        icon: "envelope.fill",
+                                        label: languageManager.localizedString("Email"),
+                                        text: "15968588744@163.com",
+                                        copyable: true
+                                    )
                                 }
                             }
                         }
@@ -76,16 +96,36 @@ struct AboutView: View {
                             HStack {
                                 Image(systemName: "hammer.fill")
                                     .foregroundColor(.blue)
-                                Text("技术栈")
+                                Text(languageManager.localizedString("Tech Stack"))
                                     .font(.headline)
                             }
                             
                             VStack(alignment: .leading, spacing: 12) {
-                                TechRow(name: "SwiftUI", description: "用户界面框架", color: .blue)
-                                TechRow(name: "SwiftData", description: "数据持久化", color: .green)
-                                TechRow(name: "Combine", description: "响应式编程", color: .orange)
-                                TechRow(name: "Charts", description: "数据可视化", color: .purple)
-                                TechRow(name: "macOS", description: "原生应用", color: .pink)
+                                TechRow(
+                                    name: "SwiftUI", 
+                                    description: languageManager.localizedString("UI Framework"), 
+                                    color: .blue
+                                )
+                                TechRow(
+                                    name: "SwiftData", 
+                                    description: languageManager.localizedString("Data Persistence"), 
+                                    color: .green
+                                )
+                                TechRow(
+                                    name: "Combine", 
+                                    description: languageManager.localizedString("Reactive Programming"), 
+                                    color: .orange
+                                )
+                                TechRow(
+                                    name: "Charts", 
+                                    description: languageManager.localizedString("Data Visualization"), 
+                                    color: .purple
+                                )
+                                TechRow(
+                                    name: "macOS", 
+                                    description: languageManager.localizedString("Native App"), 
+                                    color: .pink
+                                )
                             }
                         }
                         .padding(16)
@@ -99,40 +139,56 @@ struct AboutView: View {
                         HStack {
                             Image(systemName: "star.fill")
                                 .foregroundColor(.blue)
-                            Text("功能特点")
+                            Text(languageManager.localizedString("Features"))
                                 .font(.headline)
                         }
                         
                         HStack(spacing: 24) {
                             FeatureBox(
                                 icon: "keyboard",
-                                title: "实时监测",
-                                description: "精确记录每一次按键",
-                                details: ["全键盘按键捕获", "按键频率统计", "组合键识别"],
+                                title: languageManager.localizedString("Real-time Monitoring"),
+                                description: languageManager.localizedString("Record Every Keystroke"),
+                                details: [
+                                    languageManager.localizedString("Full Keyboard Capture"),
+                                    languageManager.localizedString("Keystroke Frequency Stats"),
+                                    languageManager.localizedString("Shortcut Recognition")
+                                ],
                                 color: .blue
                             )
                             
                             FeatureBox(
                                 icon: "chart.bar.fill",
-                                title: "数据分析",
-                                description: "全面的统计报告",
-                                details: ["每日使用时长统计", "常用按键分布", "效率趋势分析"],
+                                title: languageManager.localizedString("Data Analysis"),
+                                description: languageManager.localizedString("Comprehensive Reports"),
+                                details: [
+                                    languageManager.localizedString("Daily Usage Statistics"),
+                                    languageManager.localizedString("Common Key Distribution"),
+                                    languageManager.localizedString("Efficiency Trend Analysis")
+                                ],
                                 color: .green
                             )
                             
                             FeatureBox(
                                 icon: "gauge.high",
-                                title: "性能优化",
-                                description: "极低的系统占用",
-                                details: ["后台静默运行", "内存占用<50MB", "低CPU使用率"],
+                                title: languageManager.localizedString("Performance Optimization"),
+                                description: languageManager.localizedString("Low System Usage"),
+                                details: [
+                                    languageManager.localizedString("Background Silent Running"),
+                                    languageManager.localizedString("Memory Usage <50MB"),
+                                    languageManager.localizedString("Low CPU Usage")
+                                ],
                                 color: .orange
                             )
                             
                             FeatureBox(
                                 icon: "lock.fill",
-                                title: "隐私保护",
-                                description: "本地数据存储",
-                                details: ["无网络通信", "数据本地加密", "安全备份机制"],
+                                title: languageManager.localizedString("Privacy Protection"),
+                                description: languageManager.localizedString("Local Data Storage"),
+                                details: [
+                                    languageManager.localizedString("No Network Communication"),
+                                    languageManager.localizedString("Local Data Encryption"),
+                                    languageManager.localizedString("Secure Backup Mechanism")
+                                ],
                                 color: .purple
                             )
                         }
@@ -145,12 +201,12 @@ struct AboutView: View {
                 
                 // 底部版权信息
                 VStack(spacing: 4) {
-                    Text("© 2025 KeyMetrics. All rights reserved.")
+                    Text("© 2025 KeyMetrics. " + languageManager.localizedString("All rights reserved"))
                     HStack(spacing: 4) {
-                        Text("Build with")
+                        Text(languageManager.localizedString("Build with"))
                         Image(systemName: "heart.fill")
                             .foregroundColor(.red)
-                        Text("by Auroral")
+                        Text(languageManager.localizedString("by") + " Auroral")
                     }
                 }
                 .font(.caption)
@@ -166,6 +222,7 @@ struct AboutView: View {
 // 辅助视图组件
 struct InfoRow: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     
     let icon: String
     let label: String

@@ -1,0 +1,181 @@
+/* 
+  Localizable.strings
+  KeyMetrics
+
+  Created by 俞云烽 on 2025/02/18.
+  
+*/
+
+"Settings" = "設定";
+"General" = "一般";
+"Appearance" = "外観";
+"Language" = "言語";
+"Dark Mode" = "ダークモード";
+"Auto Start" = "自動起動";
+"Font" = "フォント";
+"System Default" = "システムデフォルト";
+"Follow System" = "システムに従う";
+"Total Keystrokes" = "総キーストローク";
+"Unique Keys" = "ユニークキー";
+"Key Distribution" = "キー分布";
+"Usage Trend" = "使用傾向";
+"Close" = "閉じる";
+"Today" = "今日";
+"Yesterday" = "昨日";
+"Last 7 Days" = "過去7日間";
+"Last 30 Days" = "過去30日間";
+"All Time" = "全期間";
+"Statistics" = "統計";
+"History" = "履歴";
+"About" = "概要";
+"Version" = "バージョン";
+"Feedback" = "フィードバック";
+"Clear Data" = "データを消去";
+"Are you sure?" = "本当によろしいですか？";
+"This action cannot be undone" = "この操作は取り消せません。";
+"Cancel" = "キャンセル";
+"Confirm" = "確認";
+"Data Management" = "データ管理";
+"Auto Backup" = "自動バックアップ";
+"Interval" = "間隔";
+"Daily" = "毎日";
+"Every 3 Days" = "3日ごと";
+"Weekly" = "毎週";
+"Export Data" = "データのエクスポート";
+"Import Data" = "データのインポート";
+"Advanced" = "詳細設定";
+"Reset All Settings" = "全設定をリセット";
+"Confirm Clear" = "消去の確認";
+"Confirm Reset" = "リセットの確認";
+"Reset settings confirmation message" = "全ての設定がデフォルトにリセットされます。続行しますか？";
+"Export Success" = "エクスポート成功";
+"OK" = "OK";
+"Theme Color" = "テーマカラー";
+"System Default" = "システムデフォルト";
+"SF Pro" = "SF Pro";
+"Helvetica Neue" = "Helvetica Neue";
+"Monaco" = "Monaco";
+"Simplified Chinese" = "簡体字中国語";
+"English" = "英語";
+"Japanese" = "日本語";
+"Traditional Chinese" = "繁体字中国語";
+"Korean" = "韓国語";
+"Default Theme" = "デフォルトテーマ";
+"Ocean Theme" = "オーシャンテーマ";
+"Forest Theme" = "フォレストテーマ";
+"Sunset Theme" = "サンセットテーマ";
+"App Description" = "KeyMetricsは、ユーザーのタイピング習慣を理解し改善するための専門的なキーボード入力分析ツールです。リアルタイムモニタリングとデータ分析により、包括的なキーボード使用レポートを提供します。";
+"Developer Info" = "開発者情報";
+"Name" = "名前";
+"Developer Name" = "俞云烽";
+"GitHub" = "GitHub";
+"Email" = "メール";
+"All rights reserved" = "全ての権利を保有";
+"Build with" = "Built with";
+"by" = "by";
+
+// 技術スタック
+"UI Framework" = "UIフレームワーク";
+"Data Persistence" = "データ永続化";
+"Reactive Programming" = "リアクティブプログラミング";
+"Data Visualization" = "データ可視化";
+"Native App" = "ネイティブアプリ";
+
+// 機能
+"Features" = "機能";
+"Real-time Monitoring" = "リアルタイムモニタリング";
+"Record Every Keystroke" = "すべてのキーストロークを記録";
+"Full Keyboard Capture" = "フルキーボードキャプチャ";
+"Keystroke Frequency Stats" = "キーストローク頻度統計";
+"Shortcut Recognition" = "ショートカット認識";
+
+"Data Analysis" = "データ分析";
+"Comprehensive Reports" = "包括的なレポート";
+"Daily Usage Statistics" = "日次使用統計";
+"Common Key Distribution" = "一般的なキー分布";
+"Efficiency Trend Analysis" = "効率性傾向分析";
+
+"Performance Optimization" = "パフォーマンス最適化";
+"Low System Usage" = "低システム使用率";
+"Background Silent Running" = "バックグラウンドサイレント実行";
+"Memory Usage <50MB" = "メモリ使用量<50MB";
+"Low CPU Usage" = "低CPU使用率";
+
+"Privacy Protection" = "プライバシー保護";
+"Local Data Storage" = "ローカルデータストレージ";
+"No Network Communication" = "ネットワーク通信なし";
+"Local Data Encryption" = "ローカルデータ暗号化";
+"Secure Backup Mechanism" = "セキュアバックアップメカニズム";
+
+// ダッシュボード
+"Today's Keystrokes" = "今日のキーストローク";
+"Real-time Typing Speed" = "リアルタイム入力速度";
+"KPM" = "KPM";
+"Historical Accuracy" = "履歴精度";
+"Last Hour Accuracy" = "過去1時間の精度";
+"Keyboard Load Distribution" = "キーボード負荷分布";
+
+// キー頻度統計
+"Frequency" = "頻度";
+"Key" = "キー";
+"Times" = "回数";
+"Export Data" = "データのエクスポート";
+
+// エクスポート画面
+"Select Time Range" = "期間を選択";
+"Time Range" = "期間";
+"Last 24 Hours" = "過去24時間";
+"This Week" = "今週";
+"This Month" = "今月";
+"All Time" = "全期間";
+"Export Format" = "エクスポート形式";
+"Format" = "形式";
+"Text File" = "テキストファイル";
+"CSV File" = "CSVファイル";
+"Statistics" = "統計";
+"Total Keys" = "総キー数";
+"Unique Keys" = "ユニークキー数";
+"Most Used Key" = "最多使用キー";
+"Close" = "閉じる";
+"Exporting..." = "エクスポート中...";
+"Statistics Summary" = "統計サマリー";
+"TOP 10 Keys Statistics" = "トップ10キー統計";
+"All Keys Statistics" = "全キー統計";
+"Data Type" = "データタイプ";
+"Value" = "値";
+"Rank" = "ランク";
+"Export" = "エクスポート";
+"File saved to temporary directory" = "一時ディレクトリにファイルを保存しました";
+"Export failed" = "エクスポートに失敗しました";
+
+"Chart Type" = "グラフタイプ";
+"Donut Chart" = "ドーナツグラフ";
+"Bar Chart" = "棒グラフ";
+"Line Chart" = "折れ線グラフ";
+"TOP 10 Keys" = "トップ10キー";
+"Times Format" = "%d回";
+"%@ Total" = "%@合計";
+"%@ Unique" = "%@ユニーク";
+"%@ Most Used" = "%@最多使用";
+"Others" = "その他";
+
+// 統計カード
+"Last 24 Hours Total" = "過去24時間の総キー数";
+"Last 24 Hours Unique" = "過去24時間のユニークキー数";
+"Last 24 Hours Most Used" = "過去24時間の最多使用キー";
+
+// 年月日
+"Day" = "日";
+"Week" = "週";
+"Month" = "月";
+"Year" = "年";
+
+"Tech Stack" = "技術スタック";
+
+"Accessibility Permission Required" = "キーボード入力を監視するにはアクセシビリティ権限が必要です";
+"Grant Permission" = "権限を付与";
+"Dashboard" = "ダッシュボード";
+"Key Analysis" = "キー分析";
+"History" = "履歴";
+"Settings" = "設定";
+"About" = "概要";

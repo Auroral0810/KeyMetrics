@@ -1,0 +1,181 @@
+/*
+  Localizable.strings
+  KeyMetrics
+
+  Created by 俞云烽 on 2025/02/18.
+  
+*/
+
+"Settings" = "Settings";
+"General" = "General";
+"Appearance" = "Appearance";
+"Language" = "Language";
+"Dark Mode" = "Dark Mode";
+"Auto Start" = "Auto Start";
+"Font" = "Font";
+"System Default" = "System Default";
+"Follow System" = "Follow System";
+"Total Keystrokes" = "Total Keystrokes";
+"Unique Keys" = "Unique Keys";
+"Key Distribution" = "Key Distribution";
+"Usage Trend" = "Usage Trend";
+"Close" = "Close";
+"Today" = "Today";
+"Yesterday" = "Yesterday";
+"Last 7 Days" = "Last 7 Days";
+"Last 30 Days" = "Last 30 Days";
+"All Time" = "All Time";
+"Statistics" = "Statistics";
+"History" = "History";
+"About" = "About";
+"Version" = "Version";
+"Feedback" = "Feedback";
+"Clear Data" = "Clear Data";
+"Are you sure?" = "Are you sure?";
+"This action cannot be undone" = "This action cannot be undone.";
+"Cancel" = "Cancel";
+"Confirm" = "Confirm";
+"Data Management" = "Data Management";
+"Auto Backup" = "Auto Backup";
+"Interval" = "Interval";
+"Daily" = "Daily";
+"Every 3 Days" = "Every 3 Days";
+"Weekly" = "Weekly";
+"Export Data" = "Export Data";
+"Import Data" = "Import Data";
+"Advanced" = "Advanced";
+"Reset All Settings" = "Reset All Settings";
+"Confirm Clear" = "Confirm Clear";
+"Confirm Reset" = "Confirm Reset";
+"Reset settings confirmation message" = "This will reset all settings to default values. Do you want to continue?";
+"Export Success" = "Export Success";
+"OK" = "OK";
+"Theme Color" = "Theme Color";
+"System Default" = "System Default";
+"SF Pro" = "SF Pro";
+"Helvetica Neue" = "Helvetica Neue";
+"Monaco" = "Monaco";
+"Simplified Chinese" = "Simplified Chinese";
+"English" = "English";
+"Japanese" = "Japanese";
+"Traditional Chinese" = "Traditional Chinese";
+"Korean" = "Korean";
+"Default Theme" = "Default Theme";
+"Ocean Theme" = "Ocean Theme";
+"Forest Theme" = "Forest Theme";
+"Sunset Theme" = "Sunset Theme";
+"App Description" = "KeyMetrics is a professional keyboard input analysis tool dedicated to helping users understand and improve their typing habits. Through real-time monitoring and data analysis, it provides comprehensive keyboard usage reports.";
+"Developer Info" = "Developer Information";
+"Name" = "Name";
+"Developer Name" = "Yunfeng Yu";
+"GitHub" = "GitHub";
+"Email" = "Email";
+"All rights reserved" = "All rights reserved.";
+"Build with" = "Build with";
+"by" = "by";
+
+// Tech Stack
+"UI Framework" = "UI Framework";
+"Data Persistence" = "Data Persistence";
+"Reactive Programming" = "Reactive Programming";
+"Data Visualization" = "Data Visualization";
+"Native App" = "Native App";
+
+// Features
+"Features" = "Features";
+"Real-time Monitoring" = "Real-time Monitoring";
+"Record Every Keystroke" = "Record Every Keystroke";
+"Full Keyboard Capture" = "Full Keyboard Capture";
+"Keystroke Frequency Stats" = "Keystroke Frequency Stats";
+"Shortcut Recognition" = "Shortcut Recognition";
+
+"Data Analysis" = "Data Analysis";
+"Comprehensive Reports" = "Comprehensive Reports";
+"Daily Usage Statistics" = "Daily Usage Statistics";
+"Common Key Distribution" = "Common Key Distribution";
+"Efficiency Trend Analysis" = "Efficiency Trend Analysis";
+
+"Performance Optimization" = "Performance Optimization";
+"Low System Usage" = "Low System Usage";
+"Background Silent Running" = "Background Silent Running";
+"Memory Usage <50MB" = "Memory Usage <50MB";
+"Low CPU Usage" = "Low CPU Usage";
+
+"Privacy Protection" = "Privacy Protection";
+"Local Data Storage" = "Local Data Storage";
+"No Network Communication" = "No Network Communication";
+"Local Data Encryption" = "Local Data Encryption";
+"Secure Backup Mechanism" = "Secure Backup Mechanism";
+
+// Dashboard
+"Today's Keystrokes" = "Today's Keystrokes";
+"Real-time Typing Speed" = "Real-time Typing Speed";
+"KPM" = "KPM";
+"Historical Accuracy" = "Historical Accuracy";
+"Last Hour Accuracy" = "Last Hour Accuracy";
+"Keyboard Load Distribution" = "Keyboard Load Distribution";
+
+// Key Frequency
+"Frequency" = "Frequency";
+"Key" = "Key";
+"Times" = "Times";
+"Export Data" = "Export Data";
+
+// Export View
+"Select Time Range" = "Select Time Range";
+"Time Range" = "Time Range";
+"Last 24 Hours" = "Last 24 Hours";
+"This Week" = "This Week";
+"This Month" = "This Month";
+"All Time" = "All Time";
+"Export Format" = "Export Format";
+"Format" = "Format";
+"Text File" = "Text File";
+"CSV File" = "CSV File";
+"Statistics" = "Statistics";
+"Total Keys" = "Total Keys";
+"Unique Keys" = "Unique Keys";
+"Most Used Key" = "Most Used Key";
+"Close" = "Close";
+"Exporting..." = "Exporting...";
+"Statistics Summary" = "Statistics Summary";
+"TOP 10 Keys Statistics" = "TOP 10 Keys Statistics";
+"All Keys Statistics" = "All Keys Statistics";
+"Data Type" = "Data Type";
+"Value" = "Value";
+"Rank" = "Rank";
+"Export" = "Export";
+"File saved to temporary directory" = "File saved to temporary directory";
+"Export failed" = "Export failed";
+
+"Chart Type" = "Chart Type";
+"Donut Chart" = "Donut Chart";
+"Bar Chart" = "Bar Chart";
+"Line Chart" = "Line Chart";
+"TOP 10 Keys" = "TOP 10 Keys";
+"Times Format" = "%d times";
+"%@ Total" = "%@ Total";
+"%@ Unique" = "%@ Unique";
+"%@ Most Used" = "%@ Most Used";
+"Others" = "Others";
+
+// Stat Cards
+"Last 24 Hours Total" = "Last 24 Hours Total";
+"Last 24 Hours Unique" = "Last 24 Hours Unique";
+"Last 24 Hours Most Used" = "Last 24 Hours Most Used";
+
+// Time Units
+"Day" = "Day";
+"Week" = "Week";
+"Month" = "Month";
+"Year" = "Year";
+
+"Tech Stack" = "Tech Stack";
+
+"Accessibility Permission Required" = "Accessibility permission is required to monitor keyboard input";
+"Grant Permission" = "Grant Permission";
+"Dashboard" = "Dashboard";
+"Key Analysis" = "Key Analysis";
+"History" = "History";
+"Settings" = "Settings";
+"About" = "About";

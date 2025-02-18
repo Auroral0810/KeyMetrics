@@ -5,31 +5,31 @@ import UniformTypeIdentifiers
 struct KeyFrequencyView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var selectedTimeRange: TimeRange = .day
     @State private var showingExportSheet = false
     @State private var hoveredKey: String? = nil
     @State private var selectedChartType: ChartType = .donut
     
     enum TimeRange: String, CaseIterable {
-        case day = "24小时"
-        case week = "本周"
-        case month = "本月"
-        case all = "全部"
+        case day = "Last 24 Hours"
+        case week = "This Week"
+        case month = "This Month"
+        case all = "All Time"
         
         var description: String {
-            switch self {
-            case .day: return "24小时内"
-            case .week: return "本周"
-            case .month: return "本月"
-            case .all: return "全部时间"
-            }
+            LanguageManager.shared.localizedString(self.rawValue)
         }
     }
     
     enum ChartType: String, CaseIterable {
-        case donut = "环形图"
-        case bar = "柱状图"
-        case line = "折线图"
+        case donut = "Donut Chart"
+        case bar = "Bar Chart"
+        case line = "Line Chart"
+        
+        var description: String {
+            LanguageManager.shared.localizedString(self.rawValue)
+        }
     }
     
     var sortedKeyFrequency: [(key: String, count: Int)] {
@@ -91,9 +91,9 @@ struct KeyFrequencyView: View {
         VStack(spacing: 20) {
             // 顶部控制栏
             HStack {
-                Picker("时间范围", selection: $selectedTimeRange) {
+                Picker(languageManager.localizedString("Time Range"), selection: $selectedTimeRange) {
                     ForEach(TimeRange.allCases, id: \.self) { range in
-                        Text(range.rawValue).tag(range)
+                        Text(range.description).tag(range)
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
@@ -101,16 +101,16 @@ struct KeyFrequencyView: View {
                 
                 Spacer()
                 
-                Picker("图表类型", selection: $selectedChartType) {
+                Picker(languageManager.localizedString("Chart Type"), selection: $selectedChartType) {
                     ForEach(ChartType.allCases, id: \.self) { type in
-                        Text(type.rawValue).tag(type)
+                        Text(type.description).tag(type)
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 
                 Button(action: { showingExportSheet = true }) {
-                    Label("导出", systemImage: "square.and.arrow.up")
+                    Label(languageManager.localizedString("Export"), systemImage: "square.and.arrow.up")
                 }
                 .buttonStyle(.bordered)
                 .colorMultiply(themeManager.isDarkMode ? .white : .black)
@@ -123,21 +123,21 @@ struct KeyFrequencyView: View {
                 // 左侧统计卡片，使用时间范围统计数据
                 VStack(spacing: 16) {
                     StatCard(
-                        title: "\(selectedTimeRange.rawValue)总按键",
+                        title: String(format: languageManager.localizedString("%@ Total"), selectedTimeRange.description),
                         value: "\(timeRangeStats.totalCount)",
                         icon: "keyboard",
                         color: .blue
                     )
                     
                     StatCard(
-                        title: "\(selectedTimeRange.rawValue)独特按键",
+                        title: String(format: languageManager.localizedString("%@ Unique"), selectedTimeRange.description),
                         value: "\(timeRangeStats.uniqueKeys)",
                         icon: "number",
                         color: .green
                     )
                     
                     StatCard(
-                        title: "\(selectedTimeRange.rawValue)最常用",
+                        title: String(format: languageManager.localizedString("%@ Most Used"), selectedTimeRange.description),
                         value: timeRangeStats.mostUsedKey,
                         icon: "star",
                         color: .yellow
@@ -164,7 +164,7 @@ struct KeyFrequencyView: View {
                 
                 // 右侧排行榜
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("TOP 10 按键")
+                    Text(languageManager.localizedString("TOP 10 Keys"))
                         .font(.headline)
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
@@ -213,6 +213,7 @@ struct KeyFrequencyView: View {
 // 统计卡片组件
 struct StatCard: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let title: String
     let value: String
     let icon: String
@@ -247,6 +248,7 @@ struct StatCard: View {
 // 排行榜行组件
 struct RankingRow: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let rank: Int
     let key: String
     let count: Int
@@ -267,9 +269,9 @@ struct RankingRow: View {
             
             Spacer()
             
-            Text(count > 0 ? "\(count)" : "-")
-                .font(.system(.body, design: .monospaced))
-                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+            Text(String(format: languageManager.localizedString("Times Format"), count))
+                .font(.system(size: 12))
+                .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
@@ -298,6 +300,7 @@ private let chartColors: [Color] = [
 // 环形图组件
 struct DonutChart: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     private let totalKeyCount: Int
@@ -314,7 +317,7 @@ struct DonutChart: View {
         return chartData.enumerated().map { index, item in
             ChartLegend(
                 key: item.key,
-                color: item.key == "其他" ? chartColors.last! : chartColors[index]
+                color: item.key == languageManager.localizedString("Others") ? chartColors.last! : chartColors[index]
             )
         }
     }
@@ -326,7 +329,7 @@ struct DonutChart: View {
         
         if othersCount > 0 {
             var combinedData = top10Data
-            combinedData.append((key: "其他", count: othersCount))
+            combinedData.append((key: languageManager.localizedString("Others"), count: othersCount))
             return combinedData
         }
         return top10Data
@@ -346,18 +349,18 @@ struct DonutChart: View {
         let chart = Chart {
             ForEach(chartData, id: \.key) { item in
                 SectorMark(
-                    angle: .value("Count", item.count),
+                    angle: .value(languageManager.localizedString("Count"), item.count),
                     innerRadius: .ratio(0.6),
                     angularInset: 1.5
                 )
-                .foregroundStyle(by: .value("Key", item.key))
+                .foregroundStyle(by: .value(languageManager.localizedString("Key"), item.key))
                 .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
                 .annotation(position: .overlay) {
                     if hoveredKey == item.key {
                         VStack(spacing: 4) {
                             Text(item.key)
                                 .font(.system(size: 12, weight: .bold))
-                            Text("\(item.count)次")
+                            Text(String(format: languageManager.localizedString("Times Format"), item.count))
                                 .font(.system(size: 11))
                             Text(String(format: "%.1f%%", calculatePercentage(count: item.count)))
                                 .font(.system(size: 11))
@@ -366,7 +369,7 @@ struct DonutChart: View {
                         .background(Color.black.opacity(0.6))
                         .foregroundColor(.white)
                         .cornerRadius(4)
-                    } else if item.key == "其他" {
+                    } else if item.key == languageManager.localizedString("Others") {
                         Text(String(format: "%.1f%%", calculatePercentage(count: item.count)))
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
@@ -405,6 +408,7 @@ struct DonutChart: View {
 // 柱状图组件
 struct BarChart: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
@@ -429,17 +433,17 @@ struct BarChart: View {
         let chart = Chart {
             ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
                 BarMark(
-                    x: .value("Key", item.key),
-                    y: .value("Count", item.count)
+                    x: .value(languageManager.localizedString("Key"), item.key),
+                    y: .value(languageManager.localizedString("Count"), item.count)
                 )
-                .foregroundStyle(by: .value("Key", item.key))
+                .foregroundStyle(by: .value(languageManager.localizedString("Key"), item.key))
                 .cornerRadius(8)
                 .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
                 .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 2)
                 .annotation(position: .top, alignment: .center, spacing: 4) {
                     if hoveredKey == item.key {
                         VStack(spacing: 2) {
-                            Text("\(item.count)次")
+                            Text(String(format: languageManager.localizedString("Times Format"), item.count))
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(.white)
                             Text(item.key)
@@ -508,6 +512,7 @@ struct BarChart: View {
 // 折线图组件
 struct LineChart: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
@@ -532,23 +537,23 @@ struct LineChart: View {
         let chart = Chart {
             ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
                 LineMark(
-                    x: .value("Key", item.key),
-                    y: .value("Count", item.count)
+                    x: .value(languageManager.localizedString("Key"), item.key),
+                    y: .value(languageManager.localizedString("Count"), item.count)
                 )
                 .foregroundStyle(chartColors[index])
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.linear)
                 
                 PointMark(
-                    x: .value("Key", item.key),
-                    y: .value("Count", item.count)
+                    x: .value(languageManager.localizedString("Key"), item.key),
+                    y: .value(languageManager.localizedString("Count"), item.count)
                 )
                 .foregroundStyle(chartColors[index])
                 .symbolSize(60)
                 .annotation(position: .top) {
-                    Text("\(item.count)")
+                    Text(String(format: languageManager.localizedString("Times Format"), item.count))
                         .font(.system(size: 12))
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                         .padding(4)
                         .background(Color.black.opacity(0.1))
                         .cornerRadius(4)
@@ -598,6 +603,7 @@ struct ExportView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var exportFormat: ExportFormat = .txt
     @State private var selectedTimeRange: TimeRange = .day
     @State private var isExporting = false
@@ -610,10 +616,14 @@ struct ExportView: View {
     }
     
     enum TimeRange: String, CaseIterable {
-        case day = "24小时"
-        case week = "本周"
-        case month = "本月"
-        case all = "全部"
+        case day = "Last 24 Hours"
+        case week = "This Week"
+        case month = "This Month"
+        case all = "All Time"
+        
+        var description: String {
+            LanguageManager.shared.localizedString(self.rawValue)
+        }
     }
     
     // 计算当前选择时间范围内的统计数据
@@ -657,7 +667,7 @@ struct ExportView: View {
         VStack(spacing: 20) {
             // 标题区域
             HStack {
-                Text("导出数据")
+                Text(languageManager.localizedString("Export Data"))
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
@@ -673,14 +683,14 @@ struct ExportView: View {
                     HStack {
                         Image(systemName: "clock")
                             .foregroundColor(.blue)
-                        Text("选择时间范围")
+                        Text(languageManager.localizedString("Select Time Range"))
                             .font(.headline)
                             .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     
-                    Picker("时间范围", selection: $selectedTimeRange) {
+                    Picker(languageManager.localizedString("Time Range"), selection: $selectedTimeRange) {
                         ForEach(TimeRange.allCases, id: \.self) { range in
-                            Text(range.rawValue).tag(range)
+                            Text(range.description).tag(range)
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
@@ -692,12 +702,12 @@ struct ExportView: View {
                     HStack {
                         Image(systemName: "doc.text")
                             .foregroundColor(.green)
-                        Text("导出格式")
+                        Text(languageManager.localizedString("Export Format"))
                             .font(.headline)
                             .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     
-                    Picker("导出格式", selection: $exportFormat) {
+                    Picker(languageManager.localizedString("Format"), selection: $exportFormat) {
                         ForEach(ExportFormat.allCases, id: \.self) { format in
                             Text(format.rawValue).tag(format)
                         }
@@ -708,14 +718,29 @@ struct ExportView: View {
                 
                 // 数据统计
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("数据统计")
+                    Text(languageManager.localizedString("Statistics"))
                         .font(.headline)
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
                     VStack(spacing: 12) {
-                        StatCard(title: "总按键数", value: "\(timeRangeStats.totalCount)", icon: "keyboard", color: .blue)
-                        StatCard(title: "独特按键数", value: "\(timeRangeStats.uniqueKeys)", icon: "number", color: .green)
-                        StatCard(title: "最常用按键", value: timeRangeStats.mostUsedKey, icon: "star.fill", color: .yellow)
+                        StatCard(
+                            title: languageManager.localizedString("Total Keys"),
+                            value: "\(timeRangeStats.totalCount)",
+                            icon: "keyboard",
+                            color: .blue
+                        )
+                        StatCard(
+                            title: languageManager.localizedString("Unique Keys"),
+                            value: "\(timeRangeStats.uniqueKeys)",
+                            icon: "number",
+                            color: .green
+                        )
+                        StatCard(
+                            title: languageManager.localizedString("Most Used Key"),
+                            value: timeRangeStats.mostUsedKey,
+                            icon: "star.fill",
+                            color: .yellow
+                        )
                     }
                 }
             }
@@ -728,7 +753,7 @@ struct ExportView: View {
             // 底部按钮区域
             HStack(spacing: 16) {
                 Button(action: { dismiss() }) {
-                    Text("关闭")
+                    Text(languageManager.localizedString("Close"))
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -744,7 +769,7 @@ struct ExportView: View {
                         } else {
                             Image(systemName: "square.and.arrow.up")
                         }
-                        Text(isExporting ? "导出中..." : "导出数据")
+                        Text(isExporting ? languageManager.localizedString("Exporting...") : languageManager.localizedString("Export"))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -756,6 +781,9 @@ struct ExportView: View {
         }
         .frame(width: 500)
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
+        .alert(alertMessage, isPresented: $showAlert) {
+            Button(languageManager.localizedString("OK"), role: .cancel) { }
+        }
     }
     
     private func getStartDate() -> Date {
@@ -822,10 +850,10 @@ struct ExportView: View {
             // 分享文件
             let controller = NSWorkspace.shared.activateFileViewerSelecting([tempFile])
             
-            alertMessage = "文件已保存到临时目录"
+            alertMessage = languageManager.localizedString("File saved to temporary directory")
             showAlert = true
         } catch {
-            alertMessage = "导出失败：\(error.localizedDescription)"
+            alertMessage = languageManager.localizedString("Export failed") + ": \(error.localizedDescription)"
             showAlert = true
         }
     }
@@ -835,26 +863,24 @@ struct ExportView: View {
                                   top10: [KeyFrequencyData],
                                   allKeys: [KeyFrequencyData]) -> String {
         var content = """
-        时间范围：\(selectedTimeRange.rawValue)
+        \(languageManager.localizedString("Time Range")): \(selectedTimeRange.description)
         
-        统计概要：
-        总按键数：\(stats.totalCount)
-        独特按键数：\(stats.uniqueKeys)
-        最常用按键：\(stats.mostUsedKey)
+        \(languageManager.localizedString("Statistics Summary")):
+        \(languageManager.localizedString("Total Keys")): \(stats.totalCount)
+        \(languageManager.localizedString("Unique Keys")): \(stats.uniqueKeys)
+        \(languageManager.localizedString("Most Used Key")): \(stats.mostUsedKey)
         
-        TOP 10 按键统计：
+        \(languageManager.localizedString("TOP 10 Keys Statistics")):
         """
         
-        // 添加TOP 10数据
         for (index, key) in top10.enumerated() {
-            content += "\n\(index + 1). \(key.keyName): \(key.count)次"
+            content += "\n\(index + 1). \(key.keyName): \(key.count) \(languageManager.localizedString("Times"))"
         }
         
-        content += "\n\n所有按键统计："
+        content += "\n\n\(languageManager.localizedString("All Keys Statistics")):"
         
-        // 添加所有按键数据
         for key in allKeys {
-            content += "\n\(key.keyName): \(key.count)次"
+            content += "\n\(key.keyName): \(key.count) \(languageManager.localizedString("Times"))"
         }
         
         return content
@@ -865,25 +891,23 @@ struct ExportView: View {
                                   top10: [KeyFrequencyData],
                                   allKeys: [KeyFrequencyData]) -> String {
         var content = """
-        数据类型,值
-        时间范围,\(selectedTimeRange.rawValue)
-        总按键数,\(stats.totalCount)
-        独特按键数,\(stats.uniqueKeys)
-        最常用按键,\(stats.mostUsedKey)
+        \(languageManager.localizedString("Data Type")),\(languageManager.localizedString("Value"))
+        \(languageManager.localizedString("Time Range")),\(selectedTimeRange.description)
+        \(languageManager.localizedString("Total Keys")),\(stats.totalCount)
+        \(languageManager.localizedString("Unique Keys")),\(stats.uniqueKeys)
+        \(languageManager.localizedString("Most Used Key")),\(stats.mostUsedKey)
         
-        TOP 10 按键统计
-        排名,按键,次数
+        \(languageManager.localizedString("TOP 10 Keys Statistics"))
+        \(languageManager.localizedString("Rank")),\(languageManager.localizedString("Key")),\(languageManager.localizedString("Count"))
         """
         
-        // 添加TOP 10数据
         for (index, key) in top10.enumerated() {
             content += "\n\(index + 1),\(key.keyName),\(key.count)"
         }
         
-        content += "\n\n所有按键统计"
-        content += "\n按键,次数"
+        content += "\n\n\(languageManager.localizedString("All Keys Statistics"))"
+        content += "\n\(languageManager.localizedString("Key")),\(languageManager.localizedString("Count"))"
         
-        // 添加所有按键数据
         for key in allKeys {
             content += "\n\(key.keyName),\(key.count)"
         }

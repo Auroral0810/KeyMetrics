@@ -13,15 +13,16 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var selectedTab = 0
 
     var body: some View {
         VStack {
             if !keyboardMonitor.isMonitoring {
                 VStack {
-                    Text("需要辅助功能权限才能统计键盘输入")
+                    Text(languageManager.localizedString("Accessibility Permission Required"))
                         .foregroundColor(.red)
-                    Button("授予权限") {
+                    Button(languageManager.localizedString("Grant Permission")) {
                         keyboardMonitor.startMonitoring()
                     }
                 }
@@ -31,31 +32,31 @@ struct ContentView: View {
             TabView(selection: $selectedTab) {
                 DashboardView()
                     .tabItem {
-                        Label("仪表盘", systemImage: "chart.bar.fill")
+                        Label(languageManager.localizedString("Dashboard"), systemImage: "chart.bar.fill")
                     }
                     .tag(0)
                 
                 KeyFrequencyView()
                     .tabItem {
-                        Label("按键分析", systemImage: "keyboard")
+                        Label(languageManager.localizedString("Key Analysis"), systemImage: "keyboard")
                     }
                     .tag(1)
                 
                 HistoryView()
                     .tabItem {
-                        Label("历史记录", systemImage: "clock")
+                        Label(languageManager.localizedString("History"), systemImage: "clock")
                     }
                     .tag(2)
                 
                 SettingsView()
                     .tabItem {
-                        Label("设置", systemImage: "gear")
+                        Label(languageManager.localizedString("Settings"), systemImage: "gear")
                     }
                     .tag(3)
                 
                 AboutView()
                     .tabItem {
-                        Label("关于我们", systemImage: "info.circle")
+                        Label(languageManager.localizedString("About"), systemImage: "info.circle")
                     }
                     .tag(4)
             }

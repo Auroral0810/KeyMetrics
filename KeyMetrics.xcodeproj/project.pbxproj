@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		12B0EFA52D6456E6000E5FFD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 12B0EFA32D6456E6000E5FFD /* Localizable.strings */; };
 		12D27AA32D606635007FD9CE /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 12D27AA22D606635007FD9CE /* AlertToast */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		12B0EFA42D6456E6000E5FFD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		12B0EFA62D6456F9000E5FFD /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		12B0EFA72D6456FE000E5FFD /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		12B0EFA82D645704000E5FFD /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		12B0EFA92D64570E000E5FFD /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		12D27A082D5FA0CF007FD9CE /* KeyMetrics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyMetrics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		12D27A1B2D5FA0D0007FD9CE /* KeyMetricsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeyMetricsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		12D27A252D5FA0D0007FD9CE /* KeyMetricsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeyMetricsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,6 +86,7 @@
 		12D279FF2D5FA0CF007FD9CE = {
 			isa = PBXGroup;
 			children = (
+				12B0EFA32D6456E6000E5FFD /* Localizable.strings */,
 				12D27A0A2D5FA0CF007FD9CE /* KeyMetrics */,
 				12D27A1E2D5FA0D0007FD9CE /* KeyMetricsTests */,
 				12D27A282D5FA0D0007FD9CE /* KeyMetricsUITests */,
@@ -206,6 +213,10 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
+				"zh-Hant",
+				ja,
+				ko,
 			);
 			mainGroup = 12D279FF2D5FA0CF007FD9CE;
 			minimizedProjectReferenceProxies = 1;
@@ -229,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12B0EFA52D6456E6000E5FFD /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,12 +297,28 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		12B0EFA32D6456E6000E5FFD /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				12B0EFA42D6456E6000E5FFD /* en */,
+				12B0EFA62D6456F9000E5FFD /* zh-Hans */,
+				12B0EFA72D6456FE000E5FFD /* zh-Hant */,
+				12B0EFA82D645704000E5FFD /* ja */,
+				12B0EFA92D64570E000E5FFD /* ko */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		12D27A2D2D5FA0D0007FD9CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -354,6 +382,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";

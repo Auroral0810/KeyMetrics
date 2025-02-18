@@ -4,22 +4,36 @@ import Charts
 struct HistoryView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var selectedTimeRange: TimeRange = .week
     @State private var selectedDate: Date? = nil
     @State private var showingDateDetail = false
     
     enum TimeRange: String, CaseIterable {
-        case day = "天"
-        case week = "周"
-        case month = "月"
-        case year = "年"
+        case day
+        case week
+        case month
+        case year
+        
+        var localizedName: String {
+            switch self {
+            case .day:
+                return LanguageManager.shared.localizedString("Day")
+            case .week:
+                return LanguageManager.shared.localizedString("Week")
+            case .month:
+                return LanguageManager.shared.localizedString("Month")
+            case .year:
+                return LanguageManager.shared.localizedString("Year")
+            }
+        }
     }
     
     var body: some View {
         VStack {
-            Picker("时间范围", selection: $selectedTimeRange) {
+            Picker(languageManager.localizedString("Time Range"), selection: $selectedTimeRange) {
                 ForEach(TimeRange.allCases, id: \.self) { range in
-                    Text(range.rawValue).tag(range)
+                    Text(range.localizedName).tag(range)
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
@@ -29,14 +43,32 @@ struct HistoryView: View {
             Chart {
                 ForEach(getHistoryData(), id: \.date) { data in
                     LineMark(
-                        x: .value("Date", data.date),
-                        y: .value("Count", data.count)
+                        x: .value(languageManager.localizedString("Date"), data.date, unit: .day),
+                        y: .value(languageManager.localizedString("Count"), data.count)
                     )
+                    
                     AreaMark(
-                        x: .value("Date", data.date),
-                        y: .value("Count", data.count)
+                        x: .value(languageManager.localizedString("Date"), data.date, unit: .day),
+                        y: .value(languageManager.localizedString("Count"), data.count)
                     )
                     .opacity(0.1)
+                }
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisGridLine()
+                    if let date = value.as(Date.self) {
+                        AxisValueLabel {
+                            Text(formatShortDate(date))
+                                .font(.system(size: 10))
+                        }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks { value in
+                    AxisGridLine()
+                    AxisValueLabel()
                 }
             }
             .frame(height: 300)
@@ -47,7 +79,7 @@ struct HistoryView: View {
                     HStack {
                         Text(formatDate(data.date))
                         Spacer()
-                        Text("\(data.count) 次")
+                        Text(String(format: languageManager.localizedString("Times Format"), data.count))
                     }
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     .listRowBackground(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
@@ -89,20 +121,41 @@ struct HistoryView: View {
         }.reversed()
     }
     
+    private func formatShortDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        
+        switch languageManager.currentLanguage {
+        case .english:
+            formatter.dateFormat = "MMM d"
+        case .simplifiedChinese, .traditionalChinese:
+            formatter.dateFormat = "M月d日"
+        case .japanese:
+            formatter.dateFormat = "M月d日"
+        case .korean:
+            formatter.dateFormat = "M월 d일"
+        case .auto:
+            formatter.dateFormat = "M月d日"
+        }
+        
+        formatter.locale = Locale(identifier: languageManager.currentLanguage.rawValue)
+        return formatter.string(from: date)
+    }
+    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
+        formatter.locale = Locale(identifier: languageManager.currentLanguage.rawValue)
         return formatter.string(from: date)
     }
 }
 
 struct DayDetailView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var languageManager: LanguageManager
     let date: Date
     let keyStats: KeyStats
     @Environment(\.dismiss) private var dismiss
     
-    // 预定义颜色数组
     private let chartColors: [Color] = [
         .blue,      // 主要的蓝色
         .green,     // 鲜艳的绿色
@@ -117,14 +170,12 @@ struct DayDetailView: View {
         .gray       // 其他类别使用的灰色
     ]
     
-    // 为图例创建数据模型
     private struct ChartLegend: Identifiable {
         let id = UUID()
         let key: String
         let color: Color
     }
     
-    // 获取图例数据
     private func getLegendItems() -> [ChartLegend] {
         return getKeyDistribution().enumerated().map { index, item in
             ChartLegend(
@@ -134,7 +185,6 @@ struct DayDetailView: View {
         }
     }
     
-    // 获取按键名称的映射
     private let keyMap: [Int: String] = [
             // 第一行 Function 键（根据最新的 MacBook 键盘布局）
         53: "esc",
@@ -231,7 +281,6 @@ struct DayDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // 标题和关闭按钮
                 HStack {
                     Text(formatDate(date))
                         .font(.headline)
@@ -240,24 +289,23 @@ struct DayDetailView: View {
                     Button(action: {
                         dismiss()
                     }) {
-                        Text("关闭")
+                        Text(languageManager.localizedString("Close"))
                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                 }
                 .padding(.horizontal)
                 
                 if let dayStats = getDayStats(), dayStats.count > 0 {
-                    // 基础统计信息
                     HStack(spacing: 20) {
                         StatCard(
-                            title: "总按键",
+                            title: languageManager.localizedString("Total Keys"),
                             value: "\(dayStats.count)",
                             icon: "keyboard",
                             color: .blue
                         )
                         
                         StatCard(
-                            title: "独特按键",
+                            title: languageManager.localizedString("Unique Keys"),
                             value: "\(getUniqueKeysCount())",
                             icon: "number",
                             color: .green
@@ -265,9 +313,8 @@ struct DayDetailView: View {
                     }
                     .padding(.horizontal)
                     
-                    // 按键分布
                     VStack(alignment: .leading) {
-                        Text("按键分布")
+                        Text(languageManager.localizedString("Key Distribution"))
                             .font(.headline)
                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal)
@@ -292,9 +339,8 @@ struct DayDetailView: View {
                         }
                     }
                     
-                    // 按键使用趋势图
                     VStack(alignment: .leading) {
-                        Text("使用趋势")
+                        Text(languageManager.localizedString("Usage Trend"))
                             .font(.headline)
                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal)
@@ -355,7 +401,7 @@ struct DayDetailView: View {
                             .padding()
                     }
                 } else {
-                    Text("这一天没有按键记录")
+                    Text(languageManager.localizedString("No Records"))
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding()

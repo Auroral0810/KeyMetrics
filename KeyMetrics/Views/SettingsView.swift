@@ -12,43 +12,97 @@ struct SettingsView: View {
     @State private var backupInterval = 1 // 天
     @State private var keySoundEnabled = false
     @State private var selectedLanguage = "简体中文"
-    @State private var selectedFont = "系统默认"
+    @State private var selectedFont = "System Default"
+    @StateObject private var languageManager = LanguageManager.shared
+    @State private var needsRefresh = false
     
-    let languages = ["简体中文", "English", "日本語"]
-    let fonts = ["系统默认", "SF Pro", "Helvetica Neue", "Monaco"]
+    private let languages: [String] = LanguageType.allCases.map { $0.displayName }
+    var fonts: [String] {
+        [
+            "System Default",  // 使用英文作为键
+            "SF Pro",
+            "Helvetica Neue",
+            "Monaco"
+        ]
+    }
+    
+    private func getLocalizedFont(_ font: String) -> String {
+        if font == "System Default" {
+            return languageManager.localizedString("System Default")
+        }
+        return font
+    }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 28) {
                 // 常规设置
-                SettingSection(title: "常规", icon: "gear") {
+                SettingSection(
+                    title: languageManager.localizedString("General"),
+                    icon: "gear"
+                ) {
                     VStack(spacing: 16) {
-                        SettingToggleRow(title: "开机自启动", isOn: $autoStart)
-                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                            .padding(.horizontal, 4)
+                        SettingToggleRow(
+                            title: languageManager.localizedString("Auto Start"),
+                            isOn: $autoStart
+                        )
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .padding(.horizontal, 4)
                         
                         Divider()
                             .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
-                        SettingPickerRow(title: "语言", selection: $selectedLanguage, options: languages)
-                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                            .padding(.horizontal, 4)
+                        SettingPickerRow(
+                            title: languageManager.localizedString("Language"),
+                            selection: Binding(
+                                get: { languageManager.currentLanguage.displayName },
+                                set: { newValue in
+                                    if let index = languages.firstIndex(of: newValue) {
+                                        let type = LanguageType.allCases[index]
+                                        languageManager.setLanguage(type)
+                                        needsRefresh.toggle()
+                                    }
+                                }
+                            ),
+                            options: languages
+                        )
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .padding(.horizontal, 4)
                         
                         Divider()
                             .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
-                        SettingPickerRow(title: "字体", selection: $selectedFont, options: fonts)
-                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                            .padding(.horizontal, 4)
+                        SettingPickerRow(
+                            title: languageManager.localizedString("Font"),
+                            selection: Binding(
+                                get: { getLocalizedFont(selectedFont) },
+                                set: { newValue in
+                                    if newValue == languageManager.localizedString("System Default") {
+                                        selectedFont = "System Default"
+                                    } else {
+                                        selectedFont = newValue
+                                    }
+                                }
+                            ),
+                            options: fonts.map { getLocalizedFont($0) }
+                        )
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .padding(.horizontal, 4)
                     }
                 }
                 
                 // 外观设置
-                SettingSection(title: "外观", icon: "paintbrush.fill") {
+                SettingSection(
+                    title: languageManager.localizedString("Appearance"),
+                    icon: "paintbrush.fill"
+                ) {
                     VStack(spacing: 16) {
-                        SettingToggleRow(title: "深色模式", isOn: $themeManager.isDarkMode)
-                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                            .padding(.horizontal, 4)
+                        SettingToggleRow(
+                            title: languageManager.localizedString("Dark Mode"),
+                            isOn: $themeManager.isDarkMode
+                        )
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .padding(.horizontal, 4)
                         
                         Divider()
                             .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
@@ -59,19 +113,21 @@ struct SettingsView: View {
                 }
                 
                 // 数据管理
-                SettingSection(title: "数据管理", icon: "externaldrive.fill") {
+                SettingSection(
+                    title: languageManager.localizedString("Data Management"),
+                    icon: "externaldrive.fill"
+                ) {
                     VStack(spacing: 24) {
-                        // 备份设置
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("自动备份")
+                            Text(languageManager.localizedString("Auto Backup"))
                                 .font(.subheadline)
                                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                             
                             HStack(spacing: 20) {
-                                Picker("间隔", selection: $backupInterval) {
-                                    Text("每天").tag(1)
-                                    Text("每3天").tag(3)
-                                    Text("每周").tag(7)
+                                Picker(languageManager.localizedString("Interval"), selection: $backupInterval) {
+                                    Text(languageManager.localizedString("Daily")).tag(1)
+                                    Text(languageManager.localizedString("Every 3 Days")).tag(3)
+                                    Text(languageManager.localizedString("Weekly")).tag(7)
                                 }
                                 .pickerStyle(.segmented)
                                 .frame(maxWidth: .infinity)
@@ -85,10 +141,9 @@ struct SettingsView: View {
                         Divider()
                             .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
-                        // 数据操作按钮
                         HStack(spacing: 20) {
                             DataButton(
-                                title: "导出数据",
+                                title: languageManager.localizedString("Export Data"),
                                 icon: "square.and.arrow.up.fill",
                                 color: .blue
                             ) {
@@ -96,7 +151,7 @@ struct SettingsView: View {
                             }
                             
                             DataButton(
-                                title: "导入数据",
+                                title: languageManager.localizedString("Import Data"),
                                 icon: "square.and.arrow.down.fill",
                                 color: .green
                             ) {
@@ -104,7 +159,7 @@ struct SettingsView: View {
                             }
                             
                             DataButton(
-                                title: "清除数据",
+                                title: languageManager.localizedString("Clear Data"),
                                 icon: "trash.fill",
                                 color: .red
                             ) {
@@ -116,10 +171,14 @@ struct SettingsView: View {
                 }
                 
                 // 高级设置
-                SettingSection(title: "高级", icon: "wrench.and.screwdriver.fill") {
+                SettingSection(
+                    title: languageManager.localizedString("Advanced"),
+                    icon: "wrench.and.screwdriver.fill"
+                ) {
                     Button(action: { showResetAlert = true }) {
                         HStack {
-                            Label("重置所有设置", systemImage: "arrow.counterclockwise")
+                            Label(languageManager.localizedString("Reset All Settings"),
+                                  systemImage: "arrow.counterclockwise")
                                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             Spacer()
                         }
@@ -130,22 +189,26 @@ struct SettingsView: View {
             .padding(24)
         }
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
-        .alert("确认清除", isPresented: $showClearAlert) {
-            Button("取消", role: .cancel) { }
-            Button("确认", role: .destructive) { clearData() }
+        .alert(languageManager.localizedString("Confirm Clear"), isPresented: $showClearAlert) {
+            Button(languageManager.localizedString("Cancel"), role: .cancel) { }
+            Button(languageManager.localizedString("Confirm"), role: .destructive) { clearData() }
         } message: {
-            Text("此操作将清除所有数据且无法恢复，是否继续？")
+            Text(languageManager.localizedString("This action cannot be undone"))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
-        .alert("确认重置", isPresented: $showResetAlert) {
-            Button("取消", role: .cancel) { }
-            Button("确认", role: .destructive) { resetAllSettings() }
+        .alert(languageManager.localizedString("Confirm Reset"), isPresented: $showResetAlert) {
+            Button(languageManager.localizedString("Cancel"), role: .cancel) { }
+            Button(languageManager.localizedString("Confirm"), role: .destructive) { resetAllSettings() }
         } message: {
-            Text("此操作将重置所有设置为默认值，是否继续？")
+            Text(languageManager.localizedString("Reset settings confirmation message"))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
-        .alert("导出成功", isPresented: $showExportSuccess) {
-            Button("确定", role: .cancel) { }
+        .alert(languageManager.localizedString("Export Success"), isPresented: $showExportSuccess) {
+            Button(languageManager.localizedString("OK"), role: .cancel) { }
+        }
+        .id(needsRefresh)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("languageChanged"))) { _ in
+            needsRefresh.toggle()
         }
     }
     
@@ -168,7 +231,7 @@ struct SettingsView: View {
         backupInterval = 1
         keySoundEnabled = false
         selectedLanguage = "简体中文"
-        selectedFont = "系统默认"
+        selectedFont = "System Default"
         themeManager.isDarkMode = true
         
         // 保存默认设置到 UserDefaults
@@ -177,7 +240,7 @@ struct SettingsView: View {
         UserDefaults.standard.set(1, forKey: "backupInterval")
         UserDefaults.standard.set(false, forKey: "keySoundEnabled")
         UserDefaults.standard.set("简体中文", forKey: "selectedLanguage")
-        UserDefaults.standard.set("系统默认", forKey: "selectedFont")
+        UserDefaults.standard.set("System Default", forKey: "selectedFont")
         UserDefaults.standard.set(true, forKey: "isDarkMode")
     }
 }
@@ -351,33 +414,53 @@ struct ScaleButtonStyle: ButtonStyle {
 
 struct ThemePickerView: View {
     @EnvironmentObject var themeManager: ThemeManager
-    let themes = ["default", "ocean", "forest", "sunset"]
+    @EnvironmentObject var languageManager: LanguageManager
+    
+    let themes = [
+        ("default", "Default Theme"),
+        ("ocean", "Ocean Theme"),
+        ("forest", "Forest Theme"),
+        ("sunset", "Sunset Theme")
+    ]
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("主题色")
-                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+            Text(languageManager.localizedString("Theme Color"))
+                .font(.subheadline)
+                .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
             
             HStack(spacing: 12) {
-                ForEach(0..<themes.count, id: \.self) { index in
-                    Circle()
-                        .fill(getThemeColor(index))
-                        .frame(width: 30, height: 30)
-                        .overlay(
-                            Circle()
-                                .strokeBorder(themeManager.currentTheme == themes[index] ? .blue : .clear, lineWidth: 2)
-                        )
-                        .onTapGesture {
-                            themeManager.currentTheme = themes[index]
-                            themeManager.applyTheme()
-                        }
+                ForEach(themes, id: \.0) { theme in
+                    VStack(spacing: 4) {
+                        Circle()
+                            .fill(getThemeColor(theme.0))
+                            .frame(width: 30, height: 30)
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(themeManager.currentTheme == theme.0 ? .blue : .clear, lineWidth: 2)
+                            )
+                        
+                        Text(languageManager.localizedString(theme.1))
+                            .font(.caption)
+                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                    }
+                    .onTapGesture {
+                        themeManager.currentTheme = theme.0
+                        themeManager.applyTheme()
+                    }
                 }
             }
         }
         .padding(.vertical, 8)
     }
     
-    private func getThemeColor(_ index: Int) -> Color {
-        ThemeManager.ThemeColors.chartColors[index % ThemeManager.ThemeColors.chartColors.count]
+    private func getThemeColor(_ theme: String) -> Color {
+        switch theme {
+        case "default": return .blue
+        case "ocean": return .cyan
+        case "forest": return .green
+        case "sunset": return .orange
+        default: return .blue
+        }
     }
 }
