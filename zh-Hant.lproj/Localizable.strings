@@ -199,3 +199,24 @@
 
 "Settings have been reset to default" = "設定已重置為預設值";
 "Reset Success" = "重置成功";
+
+"Open Main Window" = "開啟主視窗";
+"Export Data" = "匯出資料";
+"Import Data" = "匯入資料";
+"Clear Data" = "清除資料";
+"Dark Mode" = "深色模式";
+"Auto Start" = "自動啟動";
+"Backup Settings" = "備份設定";
+"Auto Backup" = "自動備份";
+"Daily" = "每日";
+"Every 3 Days" = "每3天";
+"Weekly" = "每週";
+"Theme" = "主題";
+"Default Theme" = "預設主題";
+"Ocean Theme" = "海洋主題";
+"Forest Theme" = "森林主題";
+"Sunset Theme" = "日落主題";
+"Language" = "語言";
+"Font" = "字體";
+"Reset All Settings" = "重置所有設定";
+"Quit" = "退出";

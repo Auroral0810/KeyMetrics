@@ -59,7 +59,14 @@ struct SettingsView: View {
                     VStack(spacing: 16) {
                         SettingToggleRow(
                             title: languageManager.localizedString("Auto Start"),
-                            isOn: $launchManager.isAutoLaunchEnabled
+                            isOn: Binding(
+                                get: { launchManager.isAutoLaunchEnabled },
+                                set: { newValue in
+                                    launchManager.isAutoLaunchEnabled = newValue
+                                    // 发送自启动设置变化通知
+                                    NotificationCenter.default.post(name: Notification.Name("autoLaunchChanged"), object: nil)
+                                }
+                            )
                         )
                         .font(fontManager.getFont(size: 14))
                         
@@ -73,6 +80,8 @@ struct SettingsView: View {
                                     if let index = languages.firstIndex(of: newValue) {
                                         let type = LanguageType.allCases[index]
                                         languageManager.setLanguage(type)
+                                        // 发送语言变化通知
+                                        NotificationCenter.default.post(name: Notification.Name("languageChanged"), object: nil)
                                         needsRefresh.toggle()
                                     }
                                 }
@@ -90,6 +99,8 @@ struct SettingsView: View {
                                 set: { newValue in
                                     let actualFont = fonts.first { getLocalizedFont($0) == newValue } ?? "System Default"
                                     fontManager.currentFont = actualFont
+                                    // 发送字体变化通知
+                                    NotificationCenter.default.post(name: Notification.Name("fontChanged"), object: nil)
                                     needsRefresh.toggle()
                                 }
                             ),
@@ -108,7 +119,21 @@ struct SettingsView: View {
                     VStack(spacing: 16) {
                         SettingToggleRow(
                             title: languageManager.localizedString("Dark Mode"),
-                            isOn: $themeManager.isDarkMode
+                            isOn: Binding(
+                                get: { themeManager.isDarkMode },
+                                set: { newValue in
+                                    themeManager.isDarkMode = newValue
+                                    // 发送主题变化通知
+                                    NotificationCenter.default.post(
+                                        name: Notification.Name("changeTheme"),
+                                        object: nil,
+                                        userInfo: [
+                                            "theme": themeManager.currentTheme,
+                                            "isDarkMode": newValue
+                                        ]
+                                    )
+                                }
+                            )
                         )
                         .font(fontManager.getFont(size: 14))
                         
@@ -132,14 +157,19 @@ struct SettingsView: View {
                                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                             
                             HStack(spacing: 20) {
-                                Picker(languageManager.localizedString("Interval"), selection: $backupManager.backupInterval) {
+                                Picker(languageManager.localizedString("Interval"), selection: Binding(
+                                    get: { backupManager.backupInterval },
+                                    set: { newValue in
+                                        backupManager.backupInterval = newValue
+                                        // 发送备份设置变化通知
+                                        NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
+                                    }
+                                )) {
                                     Text(languageManager.localizedString("Daily")).tag(1)
                                     Text(languageManager.localizedString("Every 3 Days")).tag(3)
                                     Text(languageManager.localizedString("Weekly")).tag(7)
                                 }
                                 .pickerStyle(.segmented)
-                                .frame(maxWidth: .infinity)
-                                .colorMultiply(themeManager.isDarkMode ? .white : .black)
                                 
                                 Toggle("", isOn: Binding(
                                     get: { backupManager.isBackupEnabled },
@@ -148,6 +178,8 @@ struct SettingsView: View {
                                         if newValue {
                                             backupManager.performBackup()
                                         }
+                                        // 发送备份设置变化通知
+                                        NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
                                     }
                                 ))
                                 .labelsHidden()
@@ -501,32 +533,45 @@ struct SettingsView: View {
     private func resetAllSettings() {
         // 1. 设置开机自启动
         launchManager.isAutoLaunchEnabled = true
+        NotificationCenter.default.post(name: Notification.Name("autoLaunchChanged"), object: nil)
         
         // 2. 设置语言为英文
         languageManager.setLanguage(.english)
+        NotificationCenter.default.post(name: Notification.Name("languageChanged"), object: nil)
         
         // 3. 设置字体为系统默认
         fontManager.currentFont = "System Default"
+        NotificationCenter.default.post(name: Notification.Name("fontChanged"), object: nil)
         
-        // 4. 设置深色模式
+        // 4. 设置深色模式和默认主题
         themeManager.isDarkMode = true
-        
-        // 5. 设置默认主题
         themeManager.currentTheme = "default"
+        
+        // 保存设置到 UserDefaults
+        UserDefaults.standard.set(true, forKey: "isDarkMode")
+        UserDefaults.standard.set("default", forKey: "currentTheme")
+        
+        // 发送主题变化通知，包含完整的主题信息
+        NotificationCenter.default.post(
+            name: Notification.Name("changeTheme"),
+            object: nil,
+            userInfo: [
+                "theme": "default",
+                "isDarkMode": true
+            ]
+        )
         themeManager.applyTheme()
         
-        // 6. 设置备份选项
+        // 5. 设置备份选项
         backupManager.isBackupEnabled = true
         backupManager.backupInterval = 1  // 每天备份
+        NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
+        
+        // 6. 发送重置设置通知
+        NotificationCenter.default.post(name: Notification.Name("resetAllSettings"), object: nil)
+        
         // 7. 显示重置成功提示
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
-            let alert = NSAlert()
-            alert.messageText = languageManager.localizedString("Reset Success")
-            alert.informativeText = languageManager.localizedString("Settings have been reset to default")
-            alert.alertStyle = .informational
-            alert.addButton(withTitle: languageManager.localizedString("OK"))
-            alert.runModal()
-        }
+        showResetSuccess = true
     }
     
     private func showResetSuccessMessage(_ message: String) {

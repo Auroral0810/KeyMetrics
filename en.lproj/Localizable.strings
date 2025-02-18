@@ -182,7 +182,7 @@
 
 
 "Choose Backup File" = "Choose Backup File";
-"Import Error" = "Import Error";
+"Import Error" = "Import Error"; 
 "Import Success" = "Import Success";
 "Invalid file format or corrupted data" = "Invalid file format or corrupted data";
 "Data imported successfully" = "Data imported successfully";
@@ -190,3 +190,24 @@
 
 "Settings have been reset to default" = "Settings have been reset to default";
 "Reset Success" = "Reset Success";
+
+"Open Main Window" = "Open Main Window";
+"Export Data" = "Export Data";
+"Import Data" = "Import Data"; 
+"Clear Data" = "Clear Data";
+"Dark Mode" = "Dark Mode";
+"Auto Start" = "Auto Start";
+"Backup Settings" = "Backup Settings";
+"Auto Backup" = "Auto Backup";
+"Daily" = "Daily";
+"Every 3 Days" = "Every 3 Days";
+"Weekly" = "Weekly";
+"Theme" = "Theme";
+"Default Theme" = "Default Theme";
+"Ocean Theme" = "Ocean Theme";
+"Forest Theme" = "Forest Theme";
+"Sunset Theme" = "Sunset Theme";
+"Language" = "Language";
+"Font" = "Font";
+"Reset All Settings" = "Reset All Settings";
+"Quit" = "Quit";

@@ -197,3 +197,24 @@
 
 "Settings have been reset to default" = "設定がデフォルトにリセットされました";
 "Reset Success" = "リセット成功";
+
+"Open Main Window" = "メインウィンドウを開く";
+"Export Data" = "データをエクスポート";
+"Import Data" = "データをインポート";
+"Clear Data" = "データをクリア";
+"Dark Mode" = "ダークモード";
+"Auto Start" = "自動起動";
+"Backup Settings" = "バックアップ設定";
+"Auto Backup" = "自動バックアップ";
+"Daily" = "毎日";
+"Every 3 Days" = "3日ごと";
+"Weekly" = "毎週";
+"Theme" = "テーマ";
+"Default Theme" = "デフォルトテーマ";
+"Ocean Theme" = "オーシャンテーマ";
+"Forest Theme" = "フォレストテーマ";
+"Sunset Theme" = "サンセットテーマ";
+"Language" = "言語";
+"Font" = "フォント";
+"Reset All Settings" = "全設定をリセット";
+"Quit" = "終了";

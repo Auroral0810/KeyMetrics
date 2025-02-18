@@ -190,7 +190,7 @@
 "Georgia" = "Georgia 글꼴";
 
 "Choose Backup File" = "백업 파일 선택";
-"Import Error" = "가져오기 오류";
+"Import Error" = "가져오기 오류"; 
 "Import Success" = "가져오기 성공";
 "Invalid file format or corrupted data" = "잘못된 파일 형식 또는 손상된 데이터";
 "Data imported successfully" = "데이터를 성공적으로 가져왔습니다";
@@ -198,3 +198,24 @@
 
 "Settings have been reset to default" = "설정이 기본값으로 초기화되었습니다";
 "Reset Success" = "초기화 성공";
+
+"Open Main Window" = "메인 창 열기";
+"Export Data" = "데이터 내보내기";
+"Import Data" = "데이터 가져오기";
+"Clear Data" = "데이터 지우기";
+"Dark Mode" = "다크 모드";
+"Auto Start" = "자동 시작";
+"Backup Settings" = "백업 설정";
+"Auto Backup" = "자동 백업";
+"Daily" = "매일";
+"Every 3 Days" = "3일마다";
+"Weekly" = "매주";
+"Theme" = "테마";
+"Default Theme" = "기본 테마";
+"Ocean Theme" = "바다 테마";
+"Forest Theme" = "숲 테마";
+"Sunset Theme" = "노을 테마";
+"Language" = "언어";
+"Font" = "글꼴";
+"Reset All Settings" = "모든 설정 초기화";
+"Quit" = "종료";
