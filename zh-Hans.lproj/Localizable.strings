@@ -54,7 +54,7 @@
 "System Default" = "系统默认";
 "SF Pro" = "SF Pro";
 "Helvetica Neue" = "Helvetica Neue";
-"Monaco" = "Monaco";
+"Monaco" = "Monaco等宽字体";
 "Simplified Chinese" = "简体中文";
 "English" = "英语";
 "Japanese" = "日语";
@@ -179,3 +179,11 @@
 "History" = "历史记录";
 "Settings" = "设置";
 "About" = "关于我们";
+
+"SimHei" = "中文简黑";
+"SimSun" = "中文宋体";
+"STHeiti" = "华文黑体";
+"STKaiti" = "华文楷体";
+"Microsoft YaHei" = "微软雅黑";
+"Arial" = "Arial字体";
+"Georgia" = "Georgia字体";

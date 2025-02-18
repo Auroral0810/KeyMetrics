@@ -5,6 +5,8 @@ struct DashboardView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
+    @State private var needsRefresh = false  // 添加刷新状态
     
     var body: some View {
         ScrollView {
@@ -66,6 +68,10 @@ struct DashboardView: View {
             .padding(16)
         }
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
+        .id(needsRefresh)  // 添加 id 以触发视图刷新
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
+            needsRefresh.toggle()  // 收到通知时触发刷新
+        }
     }
     
     private func getTodayKeyCount() -> Int {
@@ -105,6 +111,8 @@ struct DashboardView: View {
 struct StatCardView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
+    @State private var needsRefresh = false
     let title: String
     let value: String
     let icon: String
@@ -120,7 +128,8 @@ struct StatCardView: View {
             }
             
             Text(value)
-                .font(.system(size: 24, weight: .bold))
+                .font(fontManager.getFont(size: 24))
+                .fontWeight(.bold)
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
             Text(title)
@@ -130,12 +139,18 @@ struct StatCardView: View {
         .padding(12)
         .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
         .cornerRadius(16)
+        .id(needsRefresh)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
+            needsRefresh.toggle()
+        }
     }
 }
+
 // 改进的速度计视图 - 更紧凑的布局
 struct SpeedMeterView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let currentSpeed: Double
     
     // 根据速度计算颜色
@@ -156,7 +171,7 @@ struct SpeedMeterView: View {
     var body: some View {
         VStack(spacing: 8) {
             Text(languageManager.localizedString("Real-time Typing Speed"))
-                .font(.subheadline)
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
             ZStack {
@@ -180,11 +195,12 @@ struct SpeedMeterView: View {
                 
                 VStack(spacing: 4) {
                     Text("\(Int(currentSpeed))")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(fontManager.getFont(size: 28))
+                        .fontWeight(.bold)
                         .foregroundColor(getSpeedColor())
                         .animation(.easeInOut(duration: 0.3), value: currentSpeed)
                     Text(languageManager.localizedString("KPM"))
-                        .font(.caption)
+                        .font(fontManager.getFont(size: 12))
                         .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                 }
             }
@@ -199,6 +215,7 @@ struct SpeedMeterView: View {
 struct AccuracyCardView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let title: String
     let accuracy: Double
     let color: Color
@@ -206,11 +223,12 @@ struct AccuracyCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.subheadline)
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
             
             Text(String(format: "%.1f%%", accuracy * 100))
-                .font(.system(size: 28, weight: .bold))
+                .font(fontManager.getFont(size: 28))
+                .fontWeight(.bold)
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
             ProgressView(value: accuracy)
@@ -295,6 +313,7 @@ extension View {
 struct KeyboardHeatMapView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let keyStats: KeyStats
     
     // 修改键盘布局数据，为重复按键添加唯一标识符
@@ -376,7 +395,8 @@ struct KeyboardHeatMapView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 Text(languageManager.localizedString("Keyboard Load Distribution"))
-                    .font(.system(size: 28, weight: .bold))
+                    .font(fontManager.getFont(size: 28))
+                    .fontWeight(.bold)
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     .padding(.bottom, 0)
                 
@@ -444,6 +464,7 @@ struct KeyData: Identifiable {
 // 单个按键单元格视图
 struct KeyCell: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var fontManager: FontManager
     let key: String
     let frequency: Int
     let maxFrequency: Int
@@ -457,7 +478,7 @@ struct KeyCell: View {
                 .cornerRadius(4)
             
             Text(key)
-                .font(.system(size: 10, weight: .medium))
+                .font(fontManager.getFont(size: 10))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
     }

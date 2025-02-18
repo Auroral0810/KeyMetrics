@@ -4,6 +4,8 @@ import AlertToast
 struct SettingsView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
+    @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     @State private var showExportSuccess = false
     @State private var showClearAlert = false
     @State private var showResetAlert = false
@@ -13,24 +15,26 @@ struct SettingsView: View {
     @State private var keySoundEnabled = false
     @State private var selectedLanguage = "简体中文"
     @State private var selectedFont = "System Default"
-    @StateObject private var languageManager = LanguageManager.shared
+    @StateObject private var languageManagerState = LanguageManager.shared
     @State private var needsRefresh = false
     
     private let languages: [String] = LanguageType.allCases.map { $0.displayName }
     var fonts: [String] {
         [
-            "System Default",  // 使用英文作为键
-            "SF Pro",
-            "Helvetica Neue",
-            "Monaco"
+            "System Default",
+            "Monaco",
+            "SimHei",
+            "SimSun",
+            "STHeiti",
+            "STKaiti",
+            "Microsoft YaHei",
+            "Arial",
+            "Georgia"
         ]
     }
     
     private func getLocalizedFont(_ font: String) -> String {
-        if font == "System Default" {
-            return languageManager.localizedString("System Default")
-        }
-        return font
+        return languageManager.localizedString(font)
     }
     
     var body: some View {
@@ -46,11 +50,9 @@ struct SettingsView: View {
                             title: languageManager.localizedString("Auto Start"),
                             isOn: $autoStart
                         )
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                        .padding(.horizontal, 4)
+                        .font(fontManager.getFont(size: 14))
                         
                         Divider()
-                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         SettingPickerRow(
                             title: languageManager.localizedString("Language"),
@@ -66,28 +68,23 @@ struct SettingsView: View {
                             ),
                             options: languages
                         )
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                        .padding(.horizontal, 4)
+                        .font(fontManager.getFont(size: 14))
                         
                         Divider()
-                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         SettingPickerRow(
                             title: languageManager.localizedString("Font"),
                             selection: Binding(
-                                get: { getLocalizedFont(selectedFont) },
+                                get: { getLocalizedFont(fontManager.currentFont) },
                                 set: { newValue in
-                                    if newValue == languageManager.localizedString("System Default") {
-                                        selectedFont = "System Default"
-                                    } else {
-                                        selectedFont = newValue
-                                    }
+                                    let actualFont = fonts.first { getLocalizedFont($0) == newValue } ?? "System Default"
+                                    fontManager.currentFont = actualFont
+                                    needsRefresh.toggle()
                                 }
                             ),
                             options: fonts.map { getLocalizedFont($0) }
                         )
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                        .padding(.horizontal, 4)
+                        .font(fontManager.getFont(size: 14))
                     }
                 }
                 
@@ -101,11 +98,9 @@ struct SettingsView: View {
                             title: languageManager.localizedString("Dark Mode"),
                             isOn: $themeManager.isDarkMode
                         )
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                        .padding(.horizontal, 4)
+                        .font(fontManager.getFont(size: 14))
                         
                         Divider()
-                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         ThemePickerView()
                             .padding(.horizontal, 4)
@@ -120,7 +115,7 @@ struct SettingsView: View {
                     VStack(spacing: 24) {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(languageManager.localizedString("Auto Backup"))
-                                .font(.subheadline)
+                                .font(fontManager.getFont(size: 14))
                                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                             
                             HStack(spacing: 20) {
@@ -139,7 +134,6 @@ struct SettingsView: View {
                         }
                         
                         Divider()
-                            .background(ThemeManager.ThemeColors.divider(themeManager.isDarkMode))
                         
                         HStack(spacing: 20) {
                             DataButton(
@@ -179,6 +173,7 @@ struct SettingsView: View {
                         HStack {
                             Label(languageManager.localizedString("Reset All Settings"),
                                   systemImage: "arrow.counterclockwise")
+                                .font(fontManager.getFont(size: 14))
                                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             Spacer()
                         }
@@ -194,6 +189,7 @@ struct SettingsView: View {
             Button(languageManager.localizedString("Confirm"), role: .destructive) { clearData() }
         } message: {
             Text(languageManager.localizedString("This action cannot be undone"))
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
         .alert(languageManager.localizedString("Confirm Reset"), isPresented: $showResetAlert) {
@@ -201,6 +197,7 @@ struct SettingsView: View {
             Button(languageManager.localizedString("Confirm"), role: .destructive) { resetAllSettings() }
         } message: {
             Text(languageManager.localizedString("Reset settings confirmation message"))
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
         }
         .alert(languageManager.localizedString("Export Success"), isPresented: $showExportSuccess) {
@@ -208,6 +205,9 @@ struct SettingsView: View {
         }
         .id(needsRefresh)
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("languageChanged"))) { _ in
+            needsRefresh.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
             needsRefresh.toggle()
         }
     }
@@ -249,6 +249,7 @@ struct SettingsView: View {
 
 struct SettingSection<Content: View>: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var fontManager: FontManager
     let title: String
     let icon: String
     let content: Content
@@ -263,8 +264,7 @@ struct SettingSection<Content: View>: View {
         GroupBox {
             VStack(alignment: .leading, spacing: 16) {
                 Label(title, systemImage: icon)
-                    .font(.headline)
-                    .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                    .font(fontManager.getFont(size: 16))
                 content
             }
         }
@@ -300,13 +300,14 @@ struct CustomGroupBoxStyle: GroupBoxStyle {
 
 struct SettingToggleRow: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var fontManager: FontManager
     let title: String
     @Binding var isOn: Bool
     
     var body: some View {
         HStack {
             Text(title)
-                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                .font(fontManager.getFont(size: 14))
             Spacer()
             Toggle("", isOn: $isOn)
                 .labelsHidden()
@@ -316,6 +317,7 @@ struct SettingToggleRow: View {
 
 struct SettingPickerRow: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var fontManager: FontManager
     let title: String
     @Binding var selection: String
     let options: [String]
@@ -323,12 +325,12 @@ struct SettingPickerRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                .font(fontManager.getFont(size: 14))
             Spacer()
             Picker("", selection: $selection) {
                 ForEach(options, id: \.self) { option in
                     Text(option)
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .font(fontManager.getFont(size: 14))
                         .tag(option)
                 }
             }
@@ -415,6 +417,7 @@ struct ScaleButtonStyle: ButtonStyle {
 struct ThemePickerView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     
     let themes = [
         ("default", "Default Theme"),
@@ -426,7 +429,7 @@ struct ThemePickerView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text(languageManager.localizedString("Theme Color"))
-                .font(.subheadline)
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
             
             HStack(spacing: 12) {
@@ -441,7 +444,7 @@ struct ThemePickerView: View {
                             )
                         
                         Text(languageManager.localizedString(theme.1))
-                            .font(.caption)
+                            .font(fontManager.getFont(size: 12))
                             .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     .onTapGesture {

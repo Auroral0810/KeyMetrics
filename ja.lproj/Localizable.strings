@@ -51,10 +51,9 @@
 "Export Success" = "エクスポート成功";
 "OK" = "OK";
 "Theme Color" = "テーマカラー";
-"System Default" = "システムデフォルト";
 "SF Pro" = "SF Pro";
 "Helvetica Neue" = "Helvetica Neue";
-"Monaco" = "Monaco";
+"Monaco" = "Monaco等幅フォント";
 "Simplified Chinese" = "簡体字中国語";
 "English" = "英語";
 "Japanese" = "日本語";
@@ -179,3 +178,11 @@
 "History" = "履歴";
 "Settings" = "設定";
 "About" = "概要";
+
+"SimHei" = "中国語簡体黒字";
+"SimSun" = "中国語宋字";
+"STHeiti" = "華文黒体";
+"STKaiti" = "華文楷書";
+"Microsoft YaHei" = "Microsoft YaHei";
+"Arial" = "Arialフォント";
+"Georgia" = "Georgiaフォント";

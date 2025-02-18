@@ -5,9 +5,11 @@ struct HistoryView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     @State private var selectedTimeRange: TimeRange = .week
     @State private var selectedDate: Date? = nil
     @State private var showingDateDetail = false
+    @State private var needsRefresh = false
     
     enum TimeRange: String, CaseIterable {
         case day
@@ -33,7 +35,9 @@ struct HistoryView: View {
         VStack {
             Picker(languageManager.localizedString("Time Range"), selection: $selectedTimeRange) {
                 ForEach(TimeRange.allCases, id: \.self) { range in
-                    Text(range.localizedName).tag(range)
+                    Text(range.localizedName)
+                        .font(fontManager.getFont(size: 14))
+                        .tag(range)
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
@@ -60,7 +64,7 @@ struct HistoryView: View {
                     if let date = value.as(Date.self) {
                         AxisValueLabel {
                             Text(formatShortDate(date))
-                                .font(.system(size: 10))
+                                .font(fontManager.getFont(size: 10))
                         }
                     }
                 }
@@ -68,7 +72,10 @@ struct HistoryView: View {
             .chartYAxis {
                 AxisMarks { value in
                     AxisGridLine()
-                    AxisValueLabel()
+                    AxisValueLabel {
+                        Text("\(value.index)")
+                            .font(fontManager.getFont(size: 10))
+                    }
                 }
             }
             .frame(height: 300)
@@ -78,8 +85,10 @@ struct HistoryView: View {
                 ForEach(getHistoryData().reversed(), id: \.date) { data in
                     HStack {
                         Text(formatDate(data.date))
+                            .font(fontManager.getFont(size: 14))
                         Spacer()
                         Text(String(format: languageManager.localizedString("Times Format"), data.count))
+                            .font(fontManager.getFont(size: 14))
                     }
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     .listRowBackground(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
@@ -99,6 +108,10 @@ struct HistoryView: View {
                 DayDetailView(date: date, keyStats: keyboardMonitor.keyStats)
                     .presentationDetents([.medium, .large])
             }
+        }
+        .id(needsRefresh)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
+            needsRefresh.toggle()
         }
     }
     
@@ -152,9 +165,11 @@ struct HistoryView: View {
 struct DayDetailView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var needsRefresh = false
     let date: Date
     let keyStats: KeyStats
-    @Environment(\.dismiss) private var dismiss
     
     private let chartColors: [Color] = [
         .blue,      // 主要的蓝色
@@ -283,13 +298,14 @@ struct DayDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Text(formatDate(date))
-                        .font(.headline)
+                        .font(fontManager.getFont(size: 16))
                         .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     Spacer()
                     Button(action: {
                         dismiss()
                     }) {
                         Text(languageManager.localizedString("Close"))
+                            .font(fontManager.getFont(size: 14))
                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                 }
@@ -315,7 +331,7 @@ struct DayDetailView: View {
                     
                     VStack(alignment: .leading) {
                         Text(languageManager.localizedString("Key Distribution"))
-                            .font(.headline)
+                            .font(fontManager.getFont(size: 16))
                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal)
                         
@@ -324,10 +340,10 @@ struct DayDetailView: View {
                                 ForEach(getKeyDistribution(), id: \.key) { item in
                                     VStack(alignment: .center) {
                                         Text(item.key)
-                                            .font(.system(.body, design: .monospaced))
+                                            .font(fontManager.getFont(size: 14))
                                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                                         Text("\(item.count)")
-                                            .font(.caption)
+                                            .font(fontManager.getFont(size: 12))
                                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                                     }
                                     .padding(8)
@@ -341,7 +357,7 @@ struct DayDetailView: View {
                     
                     VStack(alignment: .leading) {
                         Text(languageManager.localizedString("Usage Trend"))
-                            .font(.headline)
+                            .font(fontManager.getFont(size: 16))
                             .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal)
                         
@@ -402,6 +418,7 @@ struct DayDetailView: View {
                     }
                 } else {
                     Text(languageManager.localizedString("No Records"))
+                        .font(fontManager.getFont(size: 14))
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding()
@@ -411,6 +428,10 @@ struct DayDetailView: View {
         }
         .frame(width: 600, height: 500)
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
+        .id(needsRefresh)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
+            needsRefresh.toggle()
+        }
     }
     
     private func formatDate(_ date: Date) -> String {

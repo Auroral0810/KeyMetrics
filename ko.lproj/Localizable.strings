@@ -54,7 +54,7 @@
 "System Default" = "시스템 기본값";
 "SF Pro" = "SF Pro";
 "Helvetica Neue" = "Helvetica Neue";
-"Monaco" = "Monaco";
+"Monaco" = "Monaco 고정폭";
 "Simplified Chinese" = "간체 중국어";
 "English" = "영어";
 "Japanese" = "일본어";
@@ -179,3 +179,11 @@
 "History" = "기록";
 "Settings" = "설정";
 "About" = "정보";
+
+"SimHei" = "중국어 간체 흑체";
+"SimSun" = "중국어 송체";
+"STHeiti" = "화문 흑체";
+"STKaiti" = "화문 해서체";
+"Microsoft YaHei" = "Microsoft YaHei";
+"Arial" = "Arial 글꼴";
+"Georgia" = "Georgia 글꼴";

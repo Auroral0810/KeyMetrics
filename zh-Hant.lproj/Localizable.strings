@@ -54,7 +54,7 @@
 "System Default" = "系統預設";
 "SF Pro" = "SF Pro";
 "Helvetica Neue" = "Helvetica Neue";
-"Monaco" = "Monaco";
+"Monaco" = "Monaco等寬字體";
 "Simplified Chinese" = "簡體中文";
 "English" = "英語";
 "Japanese" = "日語";
@@ -179,3 +179,11 @@
 "History" = "歷史記錄";
 "Settings" = "設定";
 "About" = "關於我們";
+
+"SimHei" = "中文簡黑";
+"SimSun" = "中文宋體";
+"STHeiti" = "華文黑體";
+"STKaiti" = "華文楷體";
+"Microsoft YaHei" = "微軟雅黑";
+"Arial" = "Arial字體";
+"Georgia" = "Georgia字體";

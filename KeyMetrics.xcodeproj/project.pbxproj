@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		12B0EFA52D6456E6000E5FFD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 12B0EFA32D6456E6000E5FFD /* Localizable.strings */; };
+		12B0EFC52D646E5B000E5FFD /* Monaco.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12B0EFC02D646E5B000E5FFD /* Monaco.ttf */; };
+		12B0EFCF2D647375000E5FFD /* Arial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12B0EFCE2D647375000E5FFD /* Arial.ttf */; };
+		12B0EFD12D647387000E5FFD /* Georgia.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12B0EFD02D647387000E5FFD /* Georgia.ttf */; };
 		12D27AA32D606635007FD9CE /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 12D27AA22D606635007FD9CE /* AlertToast */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +37,9 @@
 		12B0EFA72D6456FE000E5FFD /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		12B0EFA82D645704000E5FFD /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		12B0EFA92D64570E000E5FFD /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
+		12B0EFC02D646E5B000E5FFD /* Monaco.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Monaco.ttf; sourceTree = "<group>"; };
+		12B0EFCE2D647375000E5FFD /* Arial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Arial.ttf; sourceTree = "<group>"; };
+		12B0EFD02D647387000E5FFD /* Georgia.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Georgia.ttf; sourceTree = "<group>"; };
 		12D27A082D5FA0CF007FD9CE /* KeyMetrics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyMetrics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		12D27A1B2D5FA0D0007FD9CE /* KeyMetricsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeyMetricsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		12D27A252D5FA0D0007FD9CE /* KeyMetricsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeyMetricsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,9 +89,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		12B0EFC32D646E5B000E5FFD /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				12B0EFD02D647387000E5FFD /* Georgia.ttf */,
+				12B0EFCE2D647375000E5FFD /* Arial.ttf */,
+				12B0EFC02D646E5B000E5FFD /* Monaco.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		12D279FF2D5FA0CF007FD9CE = {
 			isa = PBXGroup;
 			children = (
+				12B0EFC32D646E5B000E5FFD /* Fonts */,
 				12B0EFA32D6456E6000E5FFD /* Localizable.strings */,
 				12D27A0A2D5FA0CF007FD9CE /* KeyMetrics */,
 				12D27A1E2D5FA0D0007FD9CE /* KeyMetricsTests */,
@@ -241,6 +258,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				12B0EFA52D6456E6000E5FFD /* Localizable.strings in Resources */,
+				12B0EFD12D647387000E5FFD /* Georgia.ttf in Resources */,
+				12B0EFCF2D647375000E5FFD /* Arial.ttf in Resources */,
+				12B0EFC52D646E5B000E5FFD /* Monaco.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

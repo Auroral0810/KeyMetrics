@@ -3,6 +3,7 @@ import SwiftUI
 struct AboutView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     
     var body: some View {
         ScrollView {
@@ -12,13 +13,15 @@ struct AboutView: View {
                     // Logo 和名称
                     HStack(spacing: 20) {
                         Image(systemName: "keyboard")
-                            .font(.system(size: 48))
+                            .font(fontManager.getFont(size: 48))
                             .foregroundColor(.blue)
                         
                         VStack(alignment: .leading) {
                             Text("KeyMetrics")
-                                .font(.system(size: 32, weight: .bold))
+                                .font(fontManager.getFont(size: 32))
+                                .fontWeight(.bold)
                             Text(languageManager.localizedString("Version") + " 1.0.0")
+                                .font(fontManager.getFont(size: 14))
                                 .foregroundColor(.gray)
                         }
                     }
@@ -29,6 +32,7 @@ struct AboutView: View {
                             Image(systemName: "info.circle.fill")
                                 .foregroundColor(.blue)
                             Text(languageManager.localizedString("App Description"))
+                                .font(fontManager.getFont(size: 14))
                                 .lineSpacing(4)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -45,7 +49,8 @@ struct AboutView: View {
                                 Image(systemName: "person.circle.fill")
                                     .foregroundColor(.blue)
                                 Text(languageManager.localizedString("Developer Info"))
-                                    .font(.headline)
+                                    .font(fontManager.getFont(size: 16))
+                                    .fontWeight(.semibold)
                             }
                             
                             HStack(spacing: 20) {
@@ -97,7 +102,8 @@ struct AboutView: View {
                                 Image(systemName: "hammer.fill")
                                     .foregroundColor(.blue)
                                 Text(languageManager.localizedString("Tech Stack"))
-                                    .font(.headline)
+                                    .font(fontManager.getFont(size: 16))
+                                    .fontWeight(.semibold)
                             }
                             
                             VStack(alignment: .leading, spacing: 12) {
@@ -140,7 +146,8 @@ struct AboutView: View {
                             Image(systemName: "star.fill")
                                 .foregroundColor(.blue)
                             Text(languageManager.localizedString("Features"))
-                                .font(.headline)
+                                .font(fontManager.getFont(size: 16))
+                                .fontWeight(.semibold)
                         }
                         
                         HStack(spacing: 24) {
@@ -202,11 +209,14 @@ struct AboutView: View {
                 // 底部版权信息
                 VStack(spacing: 4) {
                     Text("© 2025 KeyMetrics. " + languageManager.localizedString("All rights reserved"))
+                        .font(fontManager.getFont(size: 12))
                     HStack(spacing: 4) {
                         Text(languageManager.localizedString("Build with"))
+                            .font(fontManager.getFont(size: 12))
                         Image(systemName: "heart.fill")
                             .foregroundColor(.red)
                         Text(languageManager.localizedString("by") + " Auroral")
+                            .font(fontManager.getFont(size: 12))
                     }
                 }
                 .font(.caption)
@@ -223,6 +233,7 @@ struct AboutView: View {
 struct InfoRow: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     
     let icon: String
     let label: String
@@ -237,14 +248,17 @@ struct InfoRow: View {
                 .frame(width: 16)
             
             Text(label)
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(.gray)
                 .frame(width: 60, alignment: .leading)
             
             if isLink {
                 Link(text, destination: URL(string: "https://\(text)")!)
+                    .font(fontManager.getFont(size: 14))
                     .foregroundColor(.blue)
             } else {
                 Text(text)
+                    .font(fontManager.getFont(size: 14))
                     .foregroundColor(.blue)
             }
             
@@ -259,12 +273,13 @@ struct InfoRow: View {
                 .buttonStyle(.plain)
             }
         }
-        .font(.system(size: 14))
         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
     }
 }
 
 struct TechRow: View {
+    @EnvironmentObject var fontManager: FontManager
+    
     let name: String
     let description: String
     let color: Color
@@ -272,12 +287,13 @@ struct TechRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Text(name)
-                .font(.system(size: 14, weight: .medium))
+                .font(fontManager.getFont(size: 14))
+                .fontWeight(.medium)
                 .foregroundColor(color)
                 .frame(width: 80, alignment: .leading)
             
             Text(description)
-                .font(.system(size: 14))
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(.gray)
         }
     }
@@ -285,6 +301,8 @@ struct TechRow: View {
 
 struct FeatureBox: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var fontManager: FontManager
+    
     let icon: String
     let title: String
     let description: String
@@ -299,12 +317,13 @@ struct FeatureBox: View {
                     .foregroundColor(color)
                 
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(fontManager.getFont(size: 16))
+                    .fontWeight(.medium)
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             }
             
             Text(description)
-                .font(.system(size: 14))
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
             
             VStack(alignment: .leading, spacing: 8) {
@@ -314,7 +333,7 @@ struct FeatureBox: View {
                             .fill(color)
                             .frame(width: 4, height: 4)
                         Text(detail)
-                            .font(.system(size: 12))
+                            .font(fontManager.getFont(size: 12))
                             .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                     }
                 }

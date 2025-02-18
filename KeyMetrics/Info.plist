@@ -15,5 +15,13 @@
     <string>zh-Hant</string>
     <string>ko</string>
     </array>
+    <key>ATSApplicationFontsPath</key>
+    <string>.</string>
+    <key>UIAppFonts</key>
+    <array>
+        <string>Monaco.ttf</string>
+        <string>Arial.ttf</string>
+        <string>Georgia.ttf</string>
+    </array>
 </dict>
 </plist> 

@@ -6,6 +6,7 @@ struct KeyFrequencyView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     @State private var selectedTimeRange: TimeRange = .day
     @State private var showingExportSheet = false
     @State private var hoveredKey: String? = nil
@@ -93,7 +94,8 @@ struct KeyFrequencyView: View {
             HStack {
                 Picker(languageManager.localizedString("Time Range"), selection: $selectedTimeRange) {
                     ForEach(TimeRange.allCases, id: \.self) { range in
-                        Text(range.description).tag(range)
+                        Text(range.description)
+                            .font(fontManager.getFont(size: 12))
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
@@ -103,7 +105,8 @@ struct KeyFrequencyView: View {
                 
                 Picker(languageManager.localizedString("Chart Type"), selection: $selectedChartType) {
                     ForEach(ChartType.allCases, id: \.self) { type in
-                        Text(type.description).tag(type)
+                        Text(type.description)
+                            .font(fontManager.getFont(size: 12))
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
@@ -111,6 +114,7 @@ struct KeyFrequencyView: View {
                 
                 Button(action: { showingExportSheet = true }) {
                     Label(languageManager.localizedString("Export"), systemImage: "square.and.arrow.up")
+                        .font(fontManager.getFont(size: 12))
                 }
                 .buttonStyle(.bordered)
                 .colorMultiply(themeManager.isDarkMode ? .white : .black)
@@ -165,7 +169,7 @@ struct KeyFrequencyView: View {
                 // 右侧排行榜
                 VStack(alignment: .leading, spacing: 16) {
                     Text(languageManager.localizedString("TOP 10 Keys"))
-                        .font(.headline)
+                        .font(fontManager.getFont(size: 16))
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
                     // 获取实际的按键数据
@@ -214,6 +218,7 @@ struct KeyFrequencyView: View {
 struct StatCard: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let title: String
     let value: String
     let icon: String
@@ -228,12 +233,12 @@ struct StatCard: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
+                    .font(fontManager.getFont(size: 12))
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                    .font(.subheadline)
                 
                 Text(value)
+                    .font(fontManager.getFont(size: 16))
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-                    .font(.title3)
                     .fontWeight(.medium)
             }
             
@@ -249,6 +254,7 @@ struct StatCard: View {
 struct RankingRow: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let rank: Int
     let key: String
     let count: Int
@@ -258,19 +264,19 @@ struct RankingRow: View {
     var body: some View {
         HStack {
             Text("\(rank)")
-                .font(.system(.body, design: .rounded))
+                .font(fontManager.getFont(size: 14))
                 .bold()
                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                 .frame(width: 30)
             
             Text(key)
-                .font(.system(.body, design: .monospaced))
+                .font(fontManager.getFont(size: 14))
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
             
             Spacer()
             
             Text(String(format: languageManager.localizedString("Times Format"), count))
-                .font(.system(size: 12))
+                .font(fontManager.getFont(size: 12))
                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
         }
         .padding(.vertical, 8)
@@ -301,6 +307,7 @@ private let chartColors: [Color] = [
 struct DonutChart: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     private let totalKeyCount: Int
@@ -388,7 +395,7 @@ struct DonutChart: View {
                         Label(
                             title: { 
                                 Text(item.key)
-                                    .font(.caption)
+                                    .font(fontManager.getFont(size: 10))
                                     .foregroundStyle(textColor)
                             },
                             icon: {
@@ -409,6 +416,7 @@ struct DonutChart: View {
 struct BarChart: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
@@ -472,7 +480,7 @@ struct BarChart: View {
                         Label(
                             title: { 
                                 Text(item.key)
-                                    .font(.caption)
+                                    .font(fontManager.getFont(size: 10))
                                     .foregroundStyle(textColor)
                             },
                             icon: {
@@ -513,6 +521,7 @@ struct BarChart: View {
 struct LineChart: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
@@ -570,7 +579,7 @@ struct LineChart: View {
                         Label(
                             title: { 
                                 Text(item.key)
-                                    .font(.caption)
+                                    .font(fontManager.getFont(size: 10))
                                     .foregroundStyle(textColor)
                             },
                             icon: {
@@ -604,6 +613,7 @@ struct ExportView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var fontManager: FontManager
     @State private var exportFormat: ExportFormat = .txt
     @State private var selectedTimeRange: TimeRange = .day
     @State private var isExporting = false
@@ -668,7 +678,7 @@ struct ExportView: View {
             // 标题区域
             HStack {
                 Text(languageManager.localizedString("Export Data"))
-                    .font(.title2)
+                    .font(fontManager.getFont(size: 18))
                     .fontWeight(.bold)
                     .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                 Spacer()
@@ -684,13 +694,14 @@ struct ExportView: View {
                         Image(systemName: "clock")
                             .foregroundColor(.blue)
                         Text(languageManager.localizedString("Select Time Range"))
-                            .font(.headline)
+                            .font(fontManager.getFont(size: 14))
                             .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     
                     Picker(languageManager.localizedString("Time Range"), selection: $selectedTimeRange) {
                         ForEach(TimeRange.allCases, id: \.self) { range in
-                            Text(range.description).tag(range)
+                            Text(range.description)
+                                .font(fontManager.getFont(size: 12))
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
@@ -703,13 +714,14 @@ struct ExportView: View {
                         Image(systemName: "doc.text")
                             .foregroundColor(.green)
                         Text(languageManager.localizedString("Export Format"))
-                            .font(.headline)
+                            .font(fontManager.getFont(size: 14))
                             .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                     
                     Picker(languageManager.localizedString("Format"), selection: $exportFormat) {
                         ForEach(ExportFormat.allCases, id: \.self) { format in
-                            Text(format.rawValue).tag(format)
+                            Text(format.rawValue)
+                                .font(fontManager.getFont(size: 12))
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
@@ -719,7 +731,7 @@ struct ExportView: View {
                 // 数据统计
                 VStack(alignment: .leading, spacing: 16) {
                     Text(languageManager.localizedString("Statistics"))
-                        .font(.headline)
+                        .font(fontManager.getFont(size: 14))
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
                     VStack(spacing: 12) {
@@ -729,18 +741,23 @@ struct ExportView: View {
                             icon: "keyboard",
                             color: .blue
                         )
+                        .font(fontManager.getFont(size: 12))
+                        
                         StatCard(
                             title: languageManager.localizedString("Unique Keys"),
                             value: "\(timeRangeStats.uniqueKeys)",
                             icon: "number",
                             color: .green
                         )
+                        .font(fontManager.getFont(size: 12))
+                        
                         StatCard(
                             title: languageManager.localizedString("Most Used Key"),
                             value: timeRangeStats.mostUsedKey,
                             icon: "star.fill",
                             color: .yellow
                         )
+                        .font(fontManager.getFont(size: 12))
                     }
                 }
             }
@@ -754,6 +771,7 @@ struct ExportView: View {
             HStack(spacing: 16) {
                 Button(action: { dismiss() }) {
                     Text(languageManager.localizedString("Close"))
+                        .font(fontManager.getFont(size: 12))
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -770,6 +788,7 @@ struct ExportView: View {
                             Image(systemName: "square.and.arrow.up")
                         }
                         Text(isExporting ? languageManager.localizedString("Exporting...") : languageManager.localizedString("Export"))
+                            .font(fontManager.getFont(size: 12))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -782,7 +801,10 @@ struct ExportView: View {
         .frame(width: 500)
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         .alert(alertMessage, isPresented: $showAlert) {
-            Button(languageManager.localizedString("OK"), role: .cancel) { }
+            Button(languageManager.localizedString("OK"), role: .cancel) {
+                
+            }
+            .font(fontManager.getFont(size: 12))
         }
     }
     

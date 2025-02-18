@@ -13,6 +13,7 @@ struct KeyMetricsApp: App {
     @StateObject private var keyboardMonitor = KeyboardMonitor()
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var languageManager = LanguageManager.shared
+    @StateObject private var fontManager = FontManager.shared
     
     init() {
         // 初始化语言设置
@@ -40,6 +41,7 @@ struct KeyMetricsApp: App {
                 .environmentObject(keyboardMonitor)
                 .environmentObject(themeManager)
                 .environmentObject(languageManager)
+                .environmentObject(fontManager)
                 .onAppear {
                     keyboardMonitor.startMonitoring()
                 }
