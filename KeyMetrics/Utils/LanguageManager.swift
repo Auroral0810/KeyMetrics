@@ -9,22 +9,20 @@ enum LanguageType: String, CaseIterable {
     case auto = "auto"
     
     var displayName: String {
-        let key: String
         switch self {
         case .simplifiedChinese:
-            key = "Simplified Chinese"
+            return "简体中文"
         case .english:
-            key = "English"
+            return "English"
         case .japanese:
-            key = "Japanese"
+            return "日本語"
         case .traditionalChinese:
-            key = "Traditional Chinese"
+            return "繁體中文"
         case .korean:
-            key = "Korean"
+            return "한국어"
         case .auto:
-            key = "Follow System"
+            return LanguageManager.shared.localizedString("Follow System")
         }
-        return LanguageManager.shared.localizedString(key)
     }
 }
 

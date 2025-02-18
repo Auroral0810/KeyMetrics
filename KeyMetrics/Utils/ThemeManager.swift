@@ -1,8 +1,38 @@
 import SwiftUI
 
 class ThemeManager: ObservableObject {
-    @Published var isDarkMode: Bool = true
-    @Published var currentTheme: String = "default"
+    static let shared = ThemeManager()
+    
+    @Published var isDarkMode: Bool {
+        didSet {
+            UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
+        }
+    }
+    
+    @Published var currentTheme: String {
+        didSet {
+            UserDefaults.standard.set(currentTheme, forKey: "currentTheme")
+        }
+    }
+    
+    init() {
+        // 从 UserDefaults 加载保存的设置
+        self.isDarkMode = UserDefaults.standard.bool(forKey: "isDarkMode")
+        self.currentTheme = UserDefaults.standard.string(forKey: "currentTheme") ?? "default"
+        
+        // 应用主题
+        self.applyTheme()
+        
+        // 发送初始主题通知
+        NotificationCenter.default.post(
+            name: Notification.Name("changeTheme"),
+            object: nil,
+            userInfo: [
+                "theme": self.currentTheme,
+                "isDarkMode": self.isDarkMode
+            ]
+        )
+    }
     
     func applyTheme() {
         // 保存用户偏好

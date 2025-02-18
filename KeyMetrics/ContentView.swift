@@ -81,6 +81,15 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            NotificationCenter.default.addObserver(
+                forName: Notification.Name("switchToSettings"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                selectedTab = 3
+            }
+        }
     }
 
     private func addItem() {

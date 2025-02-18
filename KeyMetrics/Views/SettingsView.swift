@@ -28,6 +28,12 @@ struct SettingsView: View {
     @State private var importErrorMessage = ""
     @State private var importSuccessMessage = ""
     @State private var showResetSuccess = false
+    @State private var showBackupConfirm = false
+    @State private var showBackupSuccess = false
+    @State private var lastBackupPath: String? = nil
+    
+    // 修改为 @State 属性来存储观察者
+    @State private var notificationObservers: [NSObjectProtocol] = []
     
     private let languages: [String] = LanguageType.allCases.map { $0.displayName }
     var fonts: [String] {
@@ -152,25 +158,49 @@ struct SettingsView: View {
                 ) {
                     VStack(spacing: 24) {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text(languageManager.localizedString("Auto Backup"))
-                                .font(fontManager.getFont(size: 14))
-                                .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
+                            HStack {
+                                Text(languageManager.localizedString("Auto Backup"))
+                                    .font(fontManager.getFont(size: 14))
+                                    .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
+                                
+                                Spacer()
+                                
+                                // 立即备份按钮
+                                Button(action: {
+                                    showBackupConfirm = true
+                                }) {
+                                    HStack {
+                                        Image(systemName: "arrow.clockwise.circle.fill")
+                                            .foregroundColor(.blue)
+                                        Text(languageManager.localizedString("Backup Now"))
+                                            .font(fontManager.getFont(size: 14))
+                                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                                    }
+                                }
+                                .buttonStyle(.borderless)
+                            }
                             
                             HStack(spacing: 20) {
+                                // 时间间隔选择器
                                 Picker(languageManager.localizedString("Interval"), selection: Binding(
-                                    get: { backupManager.backupInterval },
+                                    get: { BackupInterval(rawValue: backupManager.backupInterval) ?? .daily },
                                     set: { newValue in
-                                        backupManager.backupInterval = newValue
-                                        // 发送备份设置变化通知
+                                        backupManager.backupInterval = newValue.rawValue
                                         NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
                                     }
                                 )) {
-                                    Text(languageManager.localizedString("Daily")).tag(1)
-                                    Text(languageManager.localizedString("Every 3 Days")).tag(3)
-                                    Text(languageManager.localizedString("Weekly")).tag(7)
+                                    ForEach(BackupInterval.allCases, id: \.self) { interval in
+                                        Text(interval.description)
+                                            .font(fontManager.getFont(size: 14))
+                                            .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                                    }
                                 }
                                 .pickerStyle(.segmented)
+                                .colorMultiply(themeManager.isDarkMode ? .white : .black)
                                 
+                                Spacer()
+                                
+                                // 自动备份开关
                                 Toggle("", isOn: Binding(
                                     get: { backupManager.isBackupEnabled },
                                     set: { newValue in
@@ -178,7 +208,6 @@ struct SettingsView: View {
                                         if newValue {
                                             backupManager.performBackup()
                                         }
-                                        // 发送备份设置变化通知
                                         NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
                                     }
                                 ))
@@ -239,7 +268,8 @@ struct SettingsView: View {
         }
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         .onAppear {
-            NotificationCenter.default.addObserver(
+            // 添加主题变化观察者
+            let themeObserver = NotificationCenter.default.addObserver(
                 forName: Notification.Name("changeTheme"),
                 object: nil,
                 queue: .main
@@ -252,13 +282,53 @@ struct SettingsView: View {
                     themeManager.applyTheme()
                 }
             }
-            NotificationCenter.default.addObserver(
+            
+            // 添加重置设置观察者
+            let resetObserver = NotificationCenter.default.addObserver(
                 forName: Notification.Name("resetAllSettings"),
                 object: nil,
                 queue: .main
             ) { _ in
                 showResetSuccess = true
             }
+            
+            // 添加导出数据观察者
+            let exportObserver = NotificationCenter.default.addObserver(
+                forName: Notification.Name("showExportSheet"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                showExportSheet = true
+            }
+            
+            // 添加导入数据观察者
+            let importObserver = NotificationCenter.default.addObserver(
+                forName: Notification.Name("showImportDialog"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                importData()
+            }
+            
+            // 添加清除数据观察者
+            let clearObserver = NotificationCenter.default.addObserver(
+                forName: Notification.Name("showClearDataAlert"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                showClearAlert = true
+            }
+            
+            // 保存观察者引用
+            notificationObservers = [themeObserver, resetObserver, exportObserver, importObserver, clearObserver]
+        }
+        .onDisappear {
+            // 移除所有观察者
+            notificationObservers.forEach { observer in
+                NotificationCenter.default.removeObserver(observer)
+            }
+            // 清空观察者数组
+            notificationObservers = []
         }
         .alert(languageManager.localizedString("Confirm Clear"), isPresented: $showClearAlert) {
             Button(languageManager.localizedString("Cancel"), role: .cancel) { }
@@ -304,6 +374,24 @@ struct SettingsView: View {
         } message: {
             Text(languageManager.localizedString("Settings have been reset to default"))
                 .font(fontManager.getFont(size: 14))
+        }
+        .alert(languageManager.localizedString("Confirm Backup"), isPresented: $showBackupConfirm) {
+            Button(languageManager.localizedString("Cancel"), role: .cancel) { }
+            Button(languageManager.localizedString("Confirm")) {
+                performBackup()
+            }
+        } message: {
+            Text(languageManager.localizedString("Backup confirmation message"))
+        }
+        .alert(languageManager.localizedString("Backup Success"), isPresented: $showBackupSuccess) {
+            Button(languageManager.localizedString("Show in Finder")) {
+                if let path = lastBackupPath {
+                    NSWorkspace.shared.selectFile(path, inFileViewerRootedAtPath: "")
+                }
+            }
+            Button(languageManager.localizedString("OK"), role: .cancel) { }
+        } message: {
+            Text(languageManager.localizedString("Backup completed"))
         }
         .id(needsRefresh)
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("languageChanged"))) { _ in
@@ -623,6 +711,13 @@ struct SettingsView: View {
             }
         }
     }
+    
+    private func performBackup() {
+        if let backupPath = backupManager.performBackup() {
+            lastBackupPath = backupPath
+            showBackupSuccess = true
+        }
+    }
 }
 
 // MARK: - 辅助视图组件
@@ -847,12 +942,35 @@ struct ThemePickerView: View {
                     }
                     .onTapGesture {
                         themeManager.currentTheme = theme.0
+                        // 保存主题设置到 UserDefaults
+                        UserDefaults.standard.set(theme.0, forKey: "currentTheme")
+                        // 发送主题变化通知，包含完整的主题信息
+                        NotificationCenter.default.post(
+                            name: Notification.Name("changeTheme"),
+                            object: nil,
+                            userInfo: [
+                                "theme": theme.0,
+                                "isDarkMode": themeManager.isDarkMode
+                            ]
+                        )
                         themeManager.applyTheme()
                     }
                 }
             }
         }
         .padding(.vertical, 8)
+        .onAppear {
+            // 不再需要在这里加载主题，因为 ThemeManager 已经在初始化时加载了
+            // 只需要确保状态栏同步即可
+            NotificationCenter.default.post(
+                name: Notification.Name("changeTheme"),
+                object: nil,
+                userInfo: [
+                    "theme": themeManager.currentTheme,
+                    "isDarkMode": themeManager.isDarkMode
+                ]
+            )
+        }
     }
     
     private func getThemeColor(_ theme: String) -> Color {
@@ -870,6 +988,8 @@ enum ExportFormat: String, CaseIterable {
     case txt = "TXT"
     case csv = "CSV"
     case json = "JSON"
+    
+    var description: String { rawValue }
 }
 
 enum TimeRange: String, CaseIterable {
@@ -881,6 +1001,21 @@ enum TimeRange: String, CaseIterable {
     
     var description: String {
         LanguageManager.shared.localizedString(self.rawValue)
+    }
+}
+
+// 在 SettingsView 中添加备份间隔的枚举
+enum BackupInterval: Int, CaseIterable {
+    case daily = 1
+    case threeDays = 3
+    case weekly = 7
+    
+    var description: String {
+        switch self {
+        case .daily: return LanguageManager.shared.localizedString("Daily")
+        case .threeDays: return LanguageManager.shared.localizedString("Every 3 Days")
+        case .weekly: return LanguageManager.shared.localizedString("Weekly")
+        }
     }
 }
 
@@ -943,11 +1078,13 @@ struct ExportSettingsView: View {
                     
                     Picker(languageManager.localizedString("Format"), selection: $exportFormat) {
                         ForEach(ExportFormat.allCases, id: \.self) { format in
-                            Text(format.rawValue)
+                            Text(format.description)
                                 .font(fontManager.getFont(size: 12))
+                                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                    .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 }
             }
             .padding()

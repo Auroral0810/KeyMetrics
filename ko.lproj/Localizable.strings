@@ -219,3 +219,11 @@
 "Font" = "글꼴";
 "Reset All Settings" = "모든 설정 초기화";
 "Quit" = "종료";
+"Enable Auto Backup" = "자동 백업 활성화";
+
+"Backup Now" = "지금 백업";
+"Confirm Backup" = "백업 확인";
+"Backup confirmation message" = "백업 파일을 생성하시겠습니까?";
+"Backup Success" = "백업 성공";
+"Backup completed" = "백업 파일이 성공적으로 생성되었습니다";
+"Show in Finder" = "Finder에서 보기";

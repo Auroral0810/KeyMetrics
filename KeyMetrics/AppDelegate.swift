@@ -28,73 +28,71 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         
         // 添加打开主窗口选项
         let openMenuItem = NSMenuItem()
-        openMenuItem.title = "打开主窗口"
+        openMenuItem.title = LanguageManager.shared.localizedString("Open Main Window")
         openMenuItem.action = #selector(openMainWindow)
         openMenuItem.target = self
         menu.addItem(openMenuItem)
         
         menu.addItem(NSMenuItem.separator())
         
-        // 添加数据管理选项（直接添加到主菜单）
-        menu.addItem(NSMenuItem(title: "导出数据", action: #selector(showExportSheet), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "导入数据", action: #selector(importData), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "清除数据", action: #selector(showClearDataAlert), keyEquivalent: ""))
+        // 添加数据管理选项
+        menu.addItem(NSMenuItem(title: LanguageManager.shared.localizedString("Export Data"), action: #selector(showExportSheet), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: LanguageManager.shared.localizedString("Import Data"), action: #selector(importData), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: LanguageManager.shared.localizedString("Clear Data"), action: #selector(showClearDataAlert), keyEquivalent: ""))
         
         menu.addItem(NSMenuItem.separator())
         
         // 添加深色模式选项
-        let darkModeItem = NSMenuItem(title: "深色模式", action: #selector(toggleDarkMode), keyEquivalent: "")
+        let darkModeItem = NSMenuItem(title: LanguageManager.shared.localizedString("Dark Mode"), action: #selector(toggleDarkMode), keyEquivalent: "")
         darkModeItem.state = UserDefaults.standard.bool(forKey: "isDarkMode") ? .on : .off
         menu.addItem(darkModeItem)
         
         // 添加自启动选项
-        let autoLaunchItem = NSMenuItem(title: "开机自启动", action: #selector(toggleAutoLaunch), keyEquivalent: "")
+        let autoLaunchItem = NSMenuItem(title: LanguageManager.shared.localizedString("Auto Start"), action: #selector(toggleAutoLaunch), keyEquivalent: "")
         autoLaunchItem.state = LaunchManager.shared.isAutoLaunchEnabled ? .on : .off
         menu.addItem(autoLaunchItem)
         
         menu.addItem(NSMenuItem.separator())
         
-        // 备份设置（作为一级菜单项）
+        // 备份设置
         let backupMenuItem = NSMenuItem()
-        backupMenuItem.title = "备份设置"
+        backupMenuItem.title = LanguageManager.shared.localizedString("Backup Settings")
         let backupMenu = NSMenu()
         menu.addItem(backupMenuItem)
         menu.setSubmenu(backupMenu, for: backupMenuItem)
         
         // 添加自动备份开关
-        let autoBackupItem = NSMenuItem(title: "启用自动备份", action: #selector(toggleAutoBackup), keyEquivalent: "")
+        let autoBackupItem = NSMenuItem(title: LanguageManager.shared.localizedString("Auto Backup"), action: #selector(toggleAutoBackup), keyEquivalent: "")
         autoBackupItem.state = BackupManager.shared.isBackupEnabled ? .on : .off
         backupMenu.addItem(autoBackupItem)
         
         backupMenu.addItem(NSMenuItem.separator())
         
         // 添加备份间隔选项
-        let dailyBackupItem = NSMenuItem(title: "每天备份", action: #selector(setDailyBackup), keyEquivalent: "")
-        let threeDayBackupItem = NSMenuItem(title: "每三天备份", action: #selector(setThreeDayBackup), keyEquivalent: "")
-        let weeklyBackupItem = NSMenuItem(title: "每周备份", action: #selector(setWeeklyBackup), keyEquivalent: "")
+        let dailyBackupItem = NSMenuItem(title: LanguageManager.shared.localizedString("Daily"), action: #selector(setDailyBackup), keyEquivalent: "")
+        let threeDayBackupItem = NSMenuItem(title: LanguageManager.shared.localizedString("Every 3 Days"), action: #selector(setThreeDayBackup), keyEquivalent: "")
+        let weeklyBackupItem = NSMenuItem(title: LanguageManager.shared.localizedString("Weekly"), action: #selector(setWeeklyBackup), keyEquivalent: "")
         
-        if BackupManager.shared.isBackupEnabled {
-            dailyBackupItem.state = BackupManager.shared.backupInterval == 1 ? .on : .off
-            threeDayBackupItem.state = BackupManager.shared.backupInterval == 3 ? .on : .off
-            weeklyBackupItem.state = BackupManager.shared.backupInterval == 7 ? .on : .off
-        }
+        dailyBackupItem.state = BackupManager.shared.isBackupEnabled && BackupManager.shared.backupInterval == 1 ? .on : .off
+        threeDayBackupItem.state = BackupManager.shared.isBackupEnabled && BackupManager.shared.backupInterval == 3 ? .on : .off
+        weeklyBackupItem.state = BackupManager.shared.isBackupEnabled && BackupManager.shared.backupInterval == 7 ? .on : .off
         
         backupMenu.addItem(dailyBackupItem)
         backupMenu.addItem(threeDayBackupItem)
         backupMenu.addItem(weeklyBackupItem)
         
-        // 主题设置（作为一级菜单项）
+        // 主题设置
         let themeMenuItem = NSMenuItem()
-        themeMenuItem.title = "主题颜色"
+        themeMenuItem.title = LanguageManager.shared.localizedString("Theme")
         let themeMenu = NSMenu()
         menu.addItem(themeMenuItem)
         menu.setSubmenu(themeMenu, for: themeMenuItem)
         
         // 添加主题选项
-        let defaultThemeItem = NSMenuItem(title: "默认主题", action: #selector(setDefaultTheme), keyEquivalent: "")
-        let oceanThemeItem = NSMenuItem(title: "海洋主题", action: #selector(setOceanTheme), keyEquivalent: "")
-        let forestThemeItem = NSMenuItem(title: "森林主题", action: #selector(setForestTheme), keyEquivalent: "")
-        let sunsetThemeItem = NSMenuItem(title: "日落主题", action: #selector(setSunsetTheme), keyEquivalent: "")
+        let defaultThemeItem = NSMenuItem(title: LanguageManager.shared.localizedString("Default Theme"), action: #selector(setDefaultTheme), keyEquivalent: "")
+        let oceanThemeItem = NSMenuItem(title: LanguageManager.shared.localizedString("Ocean Theme"), action: #selector(setOceanTheme), keyEquivalent: "")
+        let forestThemeItem = NSMenuItem(title: LanguageManager.shared.localizedString("Forest Theme"), action: #selector(setForestTheme), keyEquivalent: "")
+        let sunsetThemeItem = NSMenuItem(title: LanguageManager.shared.localizedString("Sunset Theme"), action: #selector(setSunsetTheme), keyEquivalent: "")
         
         let currentTheme = UserDefaults.standard.string(forKey: "currentTheme") ?? "default"
         defaultThemeItem.state = currentTheme == "default" ? .on : .off
@@ -107,9 +105,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         themeMenu.addItem(forestThemeItem)
         themeMenu.addItem(sunsetThemeItem)
         
-        // 语言设置（作为一级菜单项）
+        // 语言设置
         let languageMenuItem = NSMenuItem()
-        languageMenuItem.title = "语言设置"
+        languageMenuItem.title = LanguageManager.shared.localizedString("Language")
         let languageMenu = NSMenu()
         menu.addItem(languageMenuItem)
         menu.setSubmenu(languageMenu, for: languageMenuItem)
@@ -133,9 +131,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         languageMenu.addItem(traditionalChineseItem)
         languageMenu.addItem(koreanItem)
         
-        // 字体设置（作为一级菜单项）
+        // 字体设置
         let fontMenuItem = NSMenuItem()
-        fontMenuItem.title = "字体设置"
+        fontMenuItem.title = LanguageManager.shared.localizedString("Font")
         let fontMenu = NSMenu()
         menu.addItem(fontMenuItem)
         menu.setSubmenu(fontMenu, for: fontMenuItem)
@@ -155,12 +153,12 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         menu.addItem(NSMenuItem.separator())
         
         // 重置设置选项
-        menu.addItem(NSMenuItem(title: "重置所有设置", action: #selector(showResetAlert), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: LanguageManager.shared.localizedString("Reset All Settings"), action: #selector(showResetAlert), keyEquivalent: ""))
         
         menu.addItem(NSMenuItem.separator())
         
         // 退出选项
-        menu.addItem(NSMenuItem(title: "完全退出", action: #selector(quitApp), keyEquivalent: "Q"))
+        menu.addItem(NSMenuItem(title: LanguageManager.shared.localizedString("Quit"), action: #selector(quitApp), keyEquivalent: "Q"))
         
         // 设置菜单
         self.statusBarItem.menu = menu
@@ -269,15 +267,36 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
     
     // 数据管理相关方法
     @objc private func showExportSheet() {
-        NotificationCenter.default.post(name: Notification.Name("showExportSheet"), object: nil)
+        // 先显示主窗口并切换到 SettingsView
+        openMainWindow()
+        // 发送切换到设置视图的通知
+        NotificationCenter.default.post(name: Notification.Name("switchToSettings"), object: nil)
+        // 延迟一小段时间后发送通知，确保窗口已经完全显示并切换到了设置视图
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NotificationCenter.default.post(name: Notification.Name("showExportSheet"), object: nil)
+        }
     }
 
     @objc private func importData() {
-        NotificationCenter.default.post(name: Notification.Name("showImportDialog"), object: nil)
+        // 先显示主窗口并切换到 SettingsView
+        openMainWindow()
+        // 发送切换到设置视图的通知
+        NotificationCenter.default.post(name: Notification.Name("switchToSettings"), object: nil)
+        // 延迟一小段时间后发送通知，确保窗口已经完全显示并切换到了设置视图
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NotificationCenter.default.post(name: Notification.Name("showImportDialog"), object: nil)
+        }
     }
 
     @objc private func showClearDataAlert() {
-        NotificationCenter.default.post(name: Notification.Name("showClearDataAlert"), object: nil)
+        // 先显示主窗口并切换到 SettingsView
+        openMainWindow()
+        // 发送切换到设置视图的通知
+        NotificationCenter.default.post(name: Notification.Name("switchToSettings"), object: nil)
+        // 延迟一小段时间后发送通知，确保窗口已经完全显示并切换到了设置视图
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NotificationCenter.default.post(name: Notification.Name("showClearDataAlert"), object: nil)
+        }
     }
 
     // 自启动设置
@@ -289,27 +308,27 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
     // 备份设置相关方法
     @objc private func toggleAutoBackup() {
         BackupManager.shared.isBackupEnabled.toggle()
-        NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
+        updateMenuItemStates()  // 立即更新所有状态
     }
 
     @objc private func setDailyBackup() {
         if BackupManager.shared.isBackupEnabled {
             BackupManager.shared.backupInterval = 1
-            NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
+            updateMenuItemStates()
         }
     }
 
     @objc private func setThreeDayBackup() {
         if BackupManager.shared.isBackupEnabled {
             BackupManager.shared.backupInterval = 3
-            NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
+            updateMenuItemStates()
         }
     }
 
     @objc private func setWeeklyBackup() {
         if BackupManager.shared.isBackupEnabled {
             BackupManager.shared.backupInterval = 7
-            NotificationCenter.default.post(name: Notification.Name("backupSettingsChanged"), object: nil)
+            updateMenuItemStates()
         }
     }
 
@@ -464,30 +483,30 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
     private func updateMenuItemStates() {
         if let menu = statusBarItem.menu {
             // 更新深色模式状态
-            if let darkModeItem = menu.items.first(where: { $0.title == "深色模式" }) {
+            if let darkModeItem = menu.items.first(where: { $0.action == #selector(toggleDarkMode) }) {
                 darkModeItem.state = UserDefaults.standard.bool(forKey: "isDarkMode") ? .on : .off
             }
             
             // 更新自启动状态
-            if let autoLaunchItem = menu.items.first(where: { $0.title == "开机自启动" }) {
+            if let autoLaunchItem = menu.items.first(where: { $0.action == #selector(toggleAutoLaunch) }) {
                 autoLaunchItem.state = LaunchManager.shared.isAutoLaunchEnabled ? .on : .off
             }
             
             // 更新备份设置状态
-            if let backupMenu = menu.items.first(where: { $0.title == "备份设置" })?.submenu {
+            if let backupMenu = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(toggleAutoBackup) }) ?? false })?.submenu {
                 // 更新自动备份开关状态
-                if let autoBackupItem = backupMenu.items.first(where: { $0.title == "启用自动备份" }) {
+                if let autoBackupItem = backupMenu.items.first(where: { $0.action == #selector(toggleAutoBackup) }) {
                     autoBackupItem.state = BackupManager.shared.isBackupEnabled ? .on : .off
                 }
                 
-                // 更新备份间隔状态
+                // 更新备份间隔状态 - 只有在自动备份开启时才显示勾选状态
                 for item in backupMenu.items {
-                    switch item.title {
-                    case "每天备份":
+                    switch item.action {
+                    case #selector(setDailyBackup):
                         item.state = BackupManager.shared.isBackupEnabled && BackupManager.shared.backupInterval == 1 ? .on : .off
-                    case "每三天备份":
+                    case #selector(setThreeDayBackup):
                         item.state = BackupManager.shared.isBackupEnabled && BackupManager.shared.backupInterval == 3 ? .on : .off
-                    case "每周备份":
+                    case #selector(setWeeklyBackup):
                         item.state = BackupManager.shared.isBackupEnabled && BackupManager.shared.backupInterval == 7 ? .on : .off
                     default:
                         break
@@ -496,17 +515,17 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
             }
             
             // 更新主题设置状态
-            if let themeMenu = menu.items.first(where: { $0.title == "主题颜色" })?.submenu {
+            if let themeMenu = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(setDefaultTheme) }) ?? false })?.submenu {
                 let currentTheme = UserDefaults.standard.string(forKey: "currentTheme") ?? "default"
                 for item in themeMenu.items {
-                    switch item.title {
-                    case "默认主题":
+                    switch item.action {
+                    case #selector(setDefaultTheme):
                         item.state = currentTheme == "default" ? .on : .off
-                    case "海洋主题":
+                    case #selector(setOceanTheme):
                         item.state = currentTheme == "ocean" ? .on : .off
-                    case "森林主题":
+                    case #selector(setForestTheme):
                         item.state = currentTheme == "forest" ? .on : .off
-                    case "日落主题":
+                    case #selector(setSunsetTheme):
                         item.state = currentTheme == "sunset" ? .on : .off
                     default:
                         break
@@ -515,18 +534,18 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
             }
             
             // 更新语言设置状态
-            if let languageMenu = menu.items.first(where: { $0.title == "语言设置" })?.submenu {
+            if let languageMenu = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(setSimplifiedChinese) }) ?? false })?.submenu {
                 for item in languageMenu.items {
-                    switch item.title {
-                    case "简体中文":
+                    switch item.action {
+                    case #selector(setSimplifiedChinese):
                         item.state = LanguageManager.shared.currentLanguage == .simplifiedChinese ? .on : .off
-                    case "English":
+                    case #selector(setEnglish):
                         item.state = LanguageManager.shared.currentLanguage == .english ? .on : .off
-                    case "日本語":
+                    case #selector(setJapanese):
                         item.state = LanguageManager.shared.currentLanguage == .japanese ? .on : .off
-                    case "繁體中文":
+                    case #selector(setTraditionalChinese):
                         item.state = LanguageManager.shared.currentLanguage == .traditionalChinese ? .on : .off
-                    case "한국어":
+                    case #selector(setKorean):
                         item.state = LanguageManager.shared.currentLanguage == .korean ? .on : .off
                     default:
                         break
@@ -535,7 +554,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
             }
             
             // 更新字体设置状态
-            if let fontMenu = menu.items.first(where: { $0.title == "字体设置" })?.submenu {
+            if let fontMenu = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(setSystemFont) }) ?? false })?.submenu {
                 for item in fontMenu.items {
                     item.state = FontManager.shared.currentFont == item.title ? .on : .off
                 }
@@ -624,6 +643,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
     
     @objc private func handleLanguageChange(_ notification: Notification) {
         updateMenuItemStates()
+        updateMenuItemTitles()
     }
     
     @objc private func handleFontChange(_ notification: Notification) {
@@ -641,5 +661,96 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
     @objc private func handleResetSettings(_ notification: Notification) {
         // 重置所有设置后更新菜单状态
         updateMenuItemStates()
+    }
+
+    private func updateMenuItemTitles() {
+        if let menu = statusBarItem.menu {
+            // 更新打开主窗口选项
+            if let openItem = menu.items.first {
+                openItem.title = LanguageManager.shared.localizedString("Open Main Window")
+            }
+            
+            // 更新数据管理选项
+            for item in menu.items {
+                switch item.title {
+                case _ where item.action == #selector(showExportSheet):
+                    item.title = LanguageManager.shared.localizedString("Export Data")
+                case _ where item.action == #selector(importData):
+                    item.title = LanguageManager.shared.localizedString("Import Data")
+                case _ where item.action == #selector(showClearDataAlert):
+                    item.title = LanguageManager.shared.localizedString("Clear Data")
+                case _ where item.action == #selector(toggleDarkMode):
+                    item.title = LanguageManager.shared.localizedString("Dark Mode")
+                case _ where item.action == #selector(toggleAutoLaunch):
+                    item.title = LanguageManager.shared.localizedString("Auto Start")
+                default:
+                    break
+                }
+            }
+            
+            // 更新备份设置菜单
+            if let backupItem = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(toggleAutoBackup) }) ?? false }) {
+                backupItem.title = LanguageManager.shared.localizedString("Backup Settings")
+                if let backupMenu = backupItem.submenu {
+                    for item in backupMenu.items {
+                        switch item.action {
+                        case #selector(toggleAutoBackup):
+                            item.title = LanguageManager.shared.localizedString("Auto Backup")
+                        case #selector(setDailyBackup):
+                            item.title = LanguageManager.shared.localizedString("Daily")
+                        case #selector(setThreeDayBackup):
+                            item.title = LanguageManager.shared.localizedString("Every 3 Days")
+                        case #selector(setWeeklyBackup):
+                            item.title = LanguageManager.shared.localizedString("Weekly")
+                        default:
+                            break
+                        }
+                    }
+                }
+            }
+            
+            // 更新主题设置菜单
+            if let themeItem = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(setDefaultTheme) }) ?? false }) {
+                themeItem.title = LanguageManager.shared.localizedString("Theme")
+                if let themeMenu = themeItem.submenu {
+                    for item in themeMenu.items {
+                        switch item.action {
+                        case #selector(setDefaultTheme):
+                            item.title = LanguageManager.shared.localizedString("Default Theme")
+                        case #selector(setOceanTheme):
+                            item.title = LanguageManager.shared.localizedString("Ocean Theme")
+                        case #selector(setForestTheme):
+                            item.title = LanguageManager.shared.localizedString("Forest Theme")
+                        case #selector(setSunsetTheme):
+                            item.title = LanguageManager.shared.localizedString("Sunset Theme")
+                        default:
+                            break
+                        }
+                    }
+                }
+            }
+            
+            // 更新语言设置菜单标题
+            if let languageItem = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(setSimplifiedChinese) }) ?? false }) {
+                languageItem.title = LanguageManager.shared.localizedString("Language")
+            }
+            
+            // 更新字体设置菜单标题
+            if let fontItem = menu.items.first(where: { $0.submenu?.items.contains(where: { $0.action == #selector(setSystemFont) }) ?? false }) {
+                fontItem.title = LanguageManager.shared.localizedString("Font")
+            }
+            
+            // 更新重置和退出选项
+            for item in menu.items {
+                switch item.action {
+                case #selector(showResetAlert):
+                    item.title = LanguageManager.shared.localizedString("Reset All Settings")
+                case #selector(quitApp):
+                    item.title = LanguageManager.shared.localizedString("Quit")
+                default:
+                    break
+                }
+            }
+        }
     }
 }

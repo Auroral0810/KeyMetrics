@@ -216,3 +216,10 @@
 "Font" = "字体";
 "Reset All Settings" = "重置所有设置";
 "Quit" = "退出";
+"Enable Auto Backup" = "启用自动备份";
+"Backup Now" = "立即备份";
+"Confirm Backup" = "确认备份";
+"Backup confirmation message" = "是否立即创建一个备份文件？";
+"Backup Success" = "备份成功";
+"Backup completed" = "备份文件已创建成功";
+"Show in Finder" = "在访达中显示";

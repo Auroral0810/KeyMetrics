@@ -218,3 +218,11 @@
 "Font" = "フォント";
 "Reset All Settings" = "全設定をリセット";
 "Quit" = "終了";
+"Enable Auto Backup" = "自動バックアップを有効化";
+
+"Backup Now" = "今すぐバックアップ";
+"Confirm Backup" = "バックアップの確認";
+"Backup confirmation message" = "バックアップファイルを作成しますか？";
+"Backup Success" = "バックアップ成功";
+"Backup completed" = "バックアップファイルが正常に作成されました";
+"Show in Finder" = "Finderで表示";

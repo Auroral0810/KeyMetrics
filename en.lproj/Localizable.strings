@@ -211,3 +211,11 @@
 "Font" = "Font";
 "Reset All Settings" = "Reset All Settings";
 "Quit" = "Quit";
+"Enable Auto Backup" = "Enable Auto Backup";
+
+"Backup Now" = "Backup Now";
+"Confirm Backup" = "Confirm Backup";
+"Backup confirmation message" = "Do you want to create a backup file now?";
+"Backup Success" = "Backup Success";
+"Backup completed" = "Backup file has been created successfully";
+"Show in Finder" = "Show in Finder";

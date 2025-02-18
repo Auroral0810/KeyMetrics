@@ -220,3 +220,11 @@
 "Font" = "字體";
 "Reset All Settings" = "重置所有設定";
 "Quit" = "退出";
+"Enable Auto Backup" = "啟用自動備份";
+
+"Backup Now" = "立即備份";
+"Confirm Backup" = "確認備份";
+"Backup confirmation message" = "是否立即創建一個備份檔案？";
+"Backup Success" = "備份成功";
+"Backup completed" = "備份檔案已創建成功";
+"Show in Finder" = "在訪達中顯示";

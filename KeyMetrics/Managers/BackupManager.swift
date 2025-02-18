@@ -38,15 +38,15 @@ class BackupManager: ObservableObject {
         }
     }
     
-    func performBackup() {
+    func performBackup() -> String? {
         let fileManager = FileManager.default
         
         // 获取源文件路径（keystats.json）
         guard let sourceURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("keystats.json") else { return }
+            .appendingPathComponent("keystats.json") else { return nil }
         
         // 确保源文件存在
-        guard fileManager.fileExists(atPath: sourceURL.path) else { return }
+        guard fileManager.fileExists(atPath: sourceURL.path) else { return nil }
         
         // 创建备份目录
         let backupDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -67,8 +67,12 @@ class BackupManager: ObservableObject {
             // 更新最后备份时间
             lastBackupDate = Date()
             
+            // 返回备份文件的路径
+            return backupURL.path
+            
         } catch {
             print("Backup failed: \(error)")
+            return nil
         }
     }
     
