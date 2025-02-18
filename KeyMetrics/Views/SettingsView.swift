@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var selectedFont = "System Default"
     @StateObject private var languageManagerState = LanguageManager.shared
     @State private var needsRefresh = false
+    @StateObject private var launchManager = LaunchManager.shared
     
     private let languages: [String] = LanguageType.allCases.map { $0.displayName }
     var fonts: [String] {
@@ -48,7 +49,7 @@ struct SettingsView: View {
                     VStack(spacing: 16) {
                         SettingToggleRow(
                             title: languageManager.localizedString("Auto Start"),
-                            isOn: $autoStart
+                            isOn: $launchManager.isAutoLaunchEnabled
                         )
                         .font(fontManager.getFont(size: 14))
                         

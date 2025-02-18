@@ -23,5 +23,7 @@
         <string>Arial.ttf</string>
         <string>Georgia.ttf</string>
     </array>
+    <key>LSBackgroundOnly</key>
+    <true/>
 </dict>
 </plist> 
