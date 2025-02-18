@@ -144,18 +144,16 @@ class KeyboardMonitor: ObservableObject {
             let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
             let currentTime = ProcessInfo.processInfo.systemUptime
             
-            // 特别处理听写键 (F5)
-            if keyCode == 176 {
-                // 如果距离上次处理的时间太短，直接返回
-                if (currentTime - self.lastProcessedTime) < 0.2 { // 增加到 200ms
-                    return
-                }
-            } else {
-                // 其他键使用正常的防重复间隔
-                if keyCode == self.lastProcessedKeyCode && 
-                   (currentTime - self.lastProcessedTime) < self.debounceInterval {
-                    return
-                }
+            // 修改防抖逻辑
+            // 1. 全局防抖降低到 30ms，以适应快速打字
+            // 2. 同键防抖降低到 60ms，避免漏记实际的重复按键
+            if (currentTime - self.lastProcessedTime) < 0.03 { // 30ms 全局防抖
+                return
+            }
+            
+            if keyCode == self.lastProcessedKeyCode && 
+               (currentTime - self.lastProcessedTime) < 0.06 { // 60ms 同键防抖
+                return
             }
             
             // 更新最后处理的按键信息
@@ -197,9 +195,13 @@ class KeyboardMonitor: ObservableObject {
             let currentTime = ProcessInfo.processInfo.systemUptime
             let flags = event.flags
             
-            // 检查是否是重复按键
+            // 使用相同的防抖逻辑
+            if (currentTime - self.lastProcessedTime) < 0.03 { // 30ms 全局防抖
+                return
+            }
+            
             if keyCode == self.lastProcessedKeyCode && 
-               (currentTime - self.lastProcessedTime) < self.debounceInterval {
+               (currentTime - self.lastProcessedTime) < 0.06 { // 60ms 同键防抖
                 return
             }
             
