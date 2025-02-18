@@ -169,7 +169,7 @@
 "Week" = "周";
 "Month" = "月";
 "Year" = "年";
-
+"This Year" = "本年";
 "Tech Stack" = "技术栈";
 
 "Accessibility Permission Required" = "需要辅助功能权限才能统计键盘输入";
