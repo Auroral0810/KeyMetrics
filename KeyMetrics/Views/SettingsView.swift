@@ -27,6 +27,7 @@ struct SettingsView: View {
     @State private var showImportSuccess = false
     @State private var importErrorMessage = ""
     @State private var importSuccessMessage = ""
+    @State private var showResetSuccess = false
     
     private let languages: [String] = LanguageType.allCases.map { $0.displayName }
     var fonts: [String] {
@@ -205,6 +206,28 @@ struct SettingsView: View {
             .padding(24)
         }
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
+        .onAppear {
+            NotificationCenter.default.addObserver(
+                forName: Notification.Name("changeTheme"),
+                object: nil,
+                queue: .main
+            ) { notification in
+                if let theme = notification.userInfo?["theme"] as? String {
+                    themeManager.currentTheme = theme
+                    if let isDarkMode = notification.userInfo?["isDarkMode"] as? Bool {
+                        themeManager.isDarkMode = isDarkMode
+                    }
+                    themeManager.applyTheme()
+                }
+            }
+            NotificationCenter.default.addObserver(
+                forName: Notification.Name("resetAllSettings"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                showResetSuccess = true
+            }
+        }
         .alert(languageManager.localizedString("Confirm Clear"), isPresented: $showClearAlert) {
             Button(languageManager.localizedString("Cancel"), role: .cancel) { }
             Button(languageManager.localizedString("Confirm"), role: .destructive) { clearData() }
@@ -244,6 +267,12 @@ struct SettingsView: View {
                 Text(importSuccessMessage)
             }
         )
+        .alert(languageManager.localizedString("Reset Success"), isPresented: $showResetSuccess) {
+            Button(languageManager.localizedString("OK"), role: .cancel) { }
+        } message: {
+            Text(languageManager.localizedString("Settings have been reset to default"))
+                .font(fontManager.getFont(size: 14))
+        }
         .id(needsRefresh)
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("languageChanged"))) { _ in
             needsRefresh.toggle()
@@ -470,23 +499,38 @@ struct SettingsView: View {
     }
     
     private func resetAllSettings() {
-        // 重置所有设置为默认值
-        autoStart = true
-        showNotification = true
-        backupInterval = 1
-        keySoundEnabled = false
-        selectedLanguage = "简体中文"
-        selectedFont = "System Default"
+        // 1. 设置开机自启动
+        launchManager.isAutoLaunchEnabled = true
+        
+        // 2. 设置语言为英文
+        languageManager.setLanguage(.english)
+        
+        // 3. 设置字体为系统默认
+        fontManager.currentFont = "System Default"
+        
+        // 4. 设置深色模式
         themeManager.isDarkMode = true
         
-        // 保存默认设置到 UserDefaults
-        UserDefaults.standard.set(true, forKey: "autoStart")
-        UserDefaults.standard.set(true, forKey: "showNotification")
-        UserDefaults.standard.set(1, forKey: "backupInterval")
-        UserDefaults.standard.set(false, forKey: "keySoundEnabled")
-        UserDefaults.standard.set("简体中文", forKey: "selectedLanguage")
-        UserDefaults.standard.set("System Default", forKey: "selectedFont")
-        UserDefaults.standard.set(true, forKey: "isDarkMode")
+        // 5. 设置默认主题
+        themeManager.currentTheme = "default"
+        themeManager.applyTheme()
+        
+        // 6. 设置备份选项
+        backupManager.isBackupEnabled = true
+        backupManager.backupInterval = 1  // 每天备份
+        // 7. 显示重置成功提示
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
+            let alert = NSAlert()
+            alert.messageText = languageManager.localizedString("Reset Success")
+            alert.informativeText = languageManager.localizedString("Settings have been reset to default")
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: languageManager.localizedString("OK"))
+            alert.runModal()
+        }
+    }
+    
+    private func showResetSuccessMessage(_ message: String) {
+        showResetSuccess = true
     }
     
     private func importData() {

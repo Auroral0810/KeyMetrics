@@ -14,6 +14,7 @@ struct KeyMetricsApp: App {
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var languageManager = LanguageManager.shared
     @StateObject private var fontManager = FontManager.shared
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     
     init() {
         // 初始化语言设置

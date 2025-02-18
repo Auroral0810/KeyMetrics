@@ -187,3 +187,6 @@
 "Invalid file format or corrupted data" = "Invalid file format or corrupted data";
 "Data imported successfully" = "Data imported successfully";
 "OK" = "OK";
+
+"Settings have been reset to default" = "Settings have been reset to default";
+"Reset Success" = "Reset Success";

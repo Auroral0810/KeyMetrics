@@ -194,3 +194,5 @@
 "Invalid file format or corrupted data" = "文件格式无效或数据已损坏";
 "Data imported successfully" = "数据导入成功";
 "OK" = "确定";
+"Settings have been reset to default" = "设置已重置为默认值";
+"Reset Success" = "重置成功";

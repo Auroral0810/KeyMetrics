@@ -23,8 +23,7 @@
         <string>Arial.ttf</string>
         <string>Georgia.ttf</string>
     </array>
-    <key>LSBackgroundOnly</key>
-    <true/>
+
     
     <!-- 添加文件访问权限 -->
     <key>NSDocumentsFolderUsageDescription</key>
@@ -49,5 +48,7 @@
             </array>
         </dict>
     </array>
+    <key>LSUIElement</key>
+    <true/>
 </dict>
 </plist> 
