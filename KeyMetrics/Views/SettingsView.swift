@@ -23,6 +23,10 @@ struct SettingsView: View {
     @State private var isExporting = false
     @State private var showExportSheet = false
     @StateObject private var backupManager = BackupManager.shared
+    @State private var showImportError = false
+    @State private var showImportSuccess = false
+    @State private var importErrorMessage = ""
+    @State private var importSuccessMessage = ""
     
     private let languages: [String] = LanguageType.allCases.map { $0.displayName }
     var fonts: [String] {
@@ -165,7 +169,7 @@ struct SettingsView: View {
                                 icon: "square.and.arrow.down.fill",
                                 color: .green
                             ) {
-                                // TODO: 实现导入功能
+                                importData()
                             }
                             
                             DataButton(
@@ -220,6 +224,26 @@ struct SettingsView: View {
         .alert(languageManager.localizedString("Export Success"), isPresented: $showExportSuccess) {
             Button(languageManager.localizedString("OK"), role: .cancel) { }
         }
+        .alert(
+            languageManager.localizedString("Import Error"),
+            isPresented: $showImportError,
+            actions: {
+                Button(languageManager.localizedString("OK"), role: .cancel) {}
+            },
+            message: {
+                Text(importErrorMessage)
+            }
+        )
+        .alert(
+            languageManager.localizedString("Import Success"),
+            isPresented: $showImportSuccess,
+            actions: {
+                Button(languageManager.localizedString("OK"), role: .cancel) {}
+            },
+            message: {
+                Text(importSuccessMessage)
+            }
+        )
         .id(needsRefresh)
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("languageChanged"))) { _ in
             needsRefresh.toggle()
@@ -463,6 +487,52 @@ struct SettingsView: View {
         UserDefaults.standard.set("简体中文", forKey: "selectedLanguage")
         UserDefaults.standard.set("System Default", forKey: "selectedFont")
         UserDefaults.standard.set(true, forKey: "isDarkMode")
+    }
+    
+    private func importData() {
+        let dialog = NSOpenPanel()
+        dialog.title = languageManager.localizedString("Choose Backup File")
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseDirectories = false
+        dialog.allowedFileTypes = ["json"]
+        
+        if dialog.runModal() == .OK {
+            guard let url = dialog.url else { return }
+            
+            do {
+                let data = try Data(contentsOf: url)
+                // 尝试解码数据以验证格式
+                let decoder = JSONDecoder()
+                let stats = try decoder.decode(KeyStats.self, from: data)
+                
+                // 如果解码成功，将文件复制到应用的 Documents 目录
+                let fileManager = FileManager.default
+                let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                let destURL = documentsURL.appendingPathComponent("keystats.json")
+                
+                // 如果目标文件已存在，先删除它
+                if fileManager.fileExists(atPath: destURL.path) {
+                    try fileManager.removeItem(at: destURL)
+                }
+                
+                // 复制新文件
+                try fileManager.copyItem(at: url, to: destURL)
+                
+                // 重新加载数据
+                keyboardMonitor.loadStats()
+                
+                // 显示成功提示
+                showImportSuccess = true
+                importSuccessMessage = languageManager.localizedString("Data imported successfully")
+                
+            } catch {
+                showImportError = true
+                importErrorMessage = languageManager.localizedString("Invalid file format or corrupted data")
+                print("Import failed: \(error)")
+            }
+        }
     }
 }
 

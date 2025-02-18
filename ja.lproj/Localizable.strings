@@ -187,3 +187,10 @@
 "Microsoft YaHei" = "Microsoft YaHei";
 "Arial" = "Arialフォント";
 "Georgia" = "Georgiaフォント";
+
+"Choose Backup File" = "バックアップファイルを選択";
+"Import Error" = "インポートエラー";
+"Import Success" = "インポート成功";
+"Invalid file format or corrupted data" = "無効なファイル形式またはデータが破損しています";
+"Data imported successfully" = "データのインポートに成功しました";
+"OK" = "OK";

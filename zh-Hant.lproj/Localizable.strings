@@ -189,3 +189,10 @@
 "Microsoft YaHei" = "微軟雅黑";
 "Arial" = "Arial字體";
 "Georgia" = "Georgia字體";
+
+"Choose Backup File" = "選擇備份檔案";
+"Import Error" = "匯入錯誤";
+"Import Success" = "匯入成功"; 
+"Invalid file format or corrupted data" = "檔案格式無效或資料已損壞";
+"Data imported successfully" = "資料匯入成功";
+"OK" = "確定";

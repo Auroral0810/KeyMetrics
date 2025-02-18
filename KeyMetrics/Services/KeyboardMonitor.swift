@@ -31,7 +31,7 @@ class KeyboardMonitor: ObservableObject {
         }
     }
     
-    private func loadStats() {
+    public func loadStats() {
         let url = getDocumentsDirectory().appendingPathComponent("keystats.json")
         if let data = try? Data(contentsOf: url),
            let loadedStats = try? JSONDecoder().decode(KeyStats.self, from: data) {

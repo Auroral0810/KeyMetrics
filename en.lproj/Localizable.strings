@@ -179,3 +179,11 @@
 "History" = "History";
 "Settings" = "Settings";
 "About" = "About";
+
+
+"Choose Backup File" = "Choose Backup File";
+"Import Error" = "Import Error";
+"Import Success" = "Import Success";
+"Invalid file format or corrupted data" = "Invalid file format or corrupted data";
+"Data imported successfully" = "Data imported successfully";
+"OK" = "OK";

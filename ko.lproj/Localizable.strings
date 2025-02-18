@@ -188,3 +188,10 @@
 "Microsoft YaHei" = "Microsoft YaHei";
 "Arial" = "Arial 글꼴";
 "Georgia" = "Georgia 글꼴";
+
+"Choose Backup File" = "백업 파일 선택";
+"Import Error" = "가져오기 오류";
+"Import Success" = "가져오기 성공";
+"Invalid file format or corrupted data" = "잘못된 파일 형식 또는 손상된 데이터";
+"Data imported successfully" = "데이터를 성공적으로 가져왔습니다";
+"OK" = "확인";
