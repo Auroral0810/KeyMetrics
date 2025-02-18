@@ -623,6 +623,7 @@ struct ExportView: View {
     enum ExportFormat: String, CaseIterable {
         case txt = "TXT"
         case csv = "CSV"
+        case json = "JSON"
     }
     
     enum TimeRange: String, CaseIterable {
@@ -855,15 +856,24 @@ struct ExportView: View {
         let content: String
         if exportFormat == .txt {
             content = generateTxtContent(stats: timeRangeStats, top10: top10Keys, allKeys: allKeyFrequency)
-        } else {
+        } else if exportFormat == .csv {
             content = generateCsvContent(stats: timeRangeStats, top10: top10Keys, allKeys: allKeyFrequency)
+        } else {
+            content = generateJsonContent(stats: timeRangeStats, top10: top10Keys, allKeys: allKeyFrequency)
         }
         
         let tempFile: URL
         do {
+            // 生成文件名：时间戳_时间范围.扩展名
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+            let timestamp = dateFormatter.string(from: Date())
+            let timeRangeStr = selectedTimeRange.rawValue.replacingOccurrences(of: " ", with: "_")
+            let fileName = "\(timestamp)_\(timeRangeStr)"
+            
             // 创建临时文件
             tempFile = FileManager.default.temporaryDirectory
-                .appendingPathComponent("keyboard_stats")
+                .appendingPathComponent(fileName)
                 .appendingPathExtension(exportFormat.rawValue.lowercased())
             
             // 写入内容
@@ -935,6 +945,40 @@ struct ExportView: View {
         }
         
         return content
+    }
+    
+    // 添加 generateJsonContent 函数
+    private func generateJsonContent(stats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String),
+                                   top10: [KeyFrequencyData],
+                                   allKeys: [KeyFrequencyData]) -> String {
+        let jsonDict: [String: Any] = [
+            "timeRange": selectedTimeRange.description,
+            "statistics": [
+                "totalCount": stats.totalCount,
+                "uniqueKeysCount": stats.uniqueKeys,
+                "mostUsedKey": stats.mostUsedKey
+            ],
+            "top10Keys": top10.map { [
+                "keyName": $0.keyName,
+                "count": $0.count
+            ]},
+            "allKeys": Dictionary(uniqueKeysWithValues: allKeys.map { 
+                ($0.keyName, $0.count)
+            }),
+            "timestamp": Int(Date().timeIntervalSince1970),
+            "date": Date().formatted(date: .complete, time: .complete)
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                return jsonString
+            }
+        } catch {
+            print("JSON serialization failed: \(error)")
+        }
+        
+        return "{}"
     }
 }
 

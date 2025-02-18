@@ -141,7 +141,6 @@ struct SettingsView: View {
                                     set: { newValue in
                                         backupManager.isBackupEnabled = newValue
                                         if newValue {
-                                            // 立即执行一次备份
                                             backupManager.performBackup()
                                         }
                                     }
@@ -159,6 +158,14 @@ struct SettingsView: View {
                                 color: .blue
                             ) {
                                 showExportSheet = true
+                            }
+                            
+                            DataButton(
+                                title: languageManager.localizedString("Import Data"),
+                                icon: "square.and.arrow.down.fill",
+                                color: .green
+                            ) {
+                                // TODO: 实现导入功能
                             }
                             
                             DataButton(
@@ -277,7 +284,14 @@ struct SettingsView: View {
         let top10Keys = Array(allKeyFrequency.prefix(10))
         
         let content: String
-        if exportFormat == .txt {
+        if exportFormat == .json {
+            content = generateJsonContent(
+                timeRange: selectedTimeRange.description,
+                stats: getTimeRangeStats(allKeyFrequency),
+                top10: top10Keys,
+                allKeys: allKeyFrequency
+            )
+        } else if exportFormat == .txt {
             content = generateTxtContent(
                 timeRange: selectedTimeRange.description,
                 stats: getTimeRangeStats(allKeyFrequency),
@@ -294,8 +308,15 @@ struct SettingsView: View {
         }
         
         do {
+            // 生成文件名：时间戳_时间范围.扩展名
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+            let timestamp = dateFormatter.string(from: Date())
+            let timeRangeStr = selectedTimeRange.rawValue.replacingOccurrences(of: " ", with: "_")
+            let fileName = "keymetrics_\(timestamp)_\(timeRangeStr)"
+            
             let tempFile = FileManager.default.temporaryDirectory
-                .appendingPathComponent("keyboard_stats")
+                .appendingPathComponent(fileName)
                 .appendingPathExtension(exportFormat.rawValue.lowercased())
             
             try content.write(to: tempFile, atomically: true, encoding: .utf8)
@@ -368,6 +389,53 @@ struct SettingsView: View {
         }
         
         return content
+    }
+    
+    private func generateJsonContent(timeRange: String, stats: (totalCount: Int, uniqueKeys: Int, mostUsedKey: String),
+                                   top10: [KeyFrequencyData], allKeys: [KeyFrequencyData]) -> String {
+        let timestamp = Int(Date().timeIntervalSince1970)
+        
+        // 创建一个函数来获取按键的可读名称
+        func getReadableKeyName(_ keyCode: Int) -> String {
+            return keyboardMonitor.getKeyName(for: keyCode)
+        }
+        
+        // 转换按键频率数据为可读格式
+        let readableKeyFrequency = Dictionary(uniqueKeysWithValues: allKeys.map { 
+            (getReadableKeyName($0.keyCode), $0.count) 
+        })
+        
+        // 转换 top10 数据为可读格式
+        let readableTop10 = top10.map { key in
+            [
+                "keyName": getReadableKeyName(key.keyCode),
+                "count": key.count
+            ]
+        }
+        
+        let jsonDict: [String: Any] = [
+            "timeRange": timeRange,
+            "statistics": [
+                "totalCount": stats.totalCount,
+                "uniqueKeysCount": stats.uniqueKeys,
+                "mostUsedKey": getReadableKeyName(top10.first?.keyCode ?? 0)
+            ],
+            "top10Keys": readableTop10,
+            "allKeys": readableKeyFrequency,
+            "timestamp": timestamp,
+            "date": Date().formatted(date: .complete, time: .complete)
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                return jsonString
+            }
+        } catch {
+            print("JSON serialization failed: \(error)")
+        }
+        
+        return "{}"
     }
     
     private func clearData() {
@@ -642,6 +710,7 @@ struct ThemePickerView: View {
 enum ExportFormat: String, CaseIterable {
     case txt = "TXT"
     case csv = "CSV"
+    case json = "JSON"
 }
 
 enum TimeRange: String, CaseIterable {
@@ -717,11 +786,9 @@ struct ExportSettingsView: View {
                         ForEach(ExportFormat.allCases, id: \.self) { format in
                             Text(format.rawValue)
                                 .font(fontManager.getFont(size: 12))
-                                .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                    .colorMultiply(themeManager.isDarkMode ? .white : .black)
                 }
             }
             .padding()
