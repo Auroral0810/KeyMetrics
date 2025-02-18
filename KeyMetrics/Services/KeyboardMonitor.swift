@@ -246,8 +246,11 @@ class KeyboardMonitor: ObservableObject {
         dayFrequency[keyCode, default: 0] += 1
         keyStats.dailyKeyFrequency[startOfDay] = dayFrequency
         
+        // 更新每日详细统计
+        keyStats.updateDailyDetail(for: now, keyCode: keyCode)
+        
         // 检查是否是删除键
-        if keyCode == 51 { // 51 是删除键的 keyCode
+        if keyCode == 51 {
             keyStats.totalDeleteCount += 1
             
             let hourDate = calendar.startOfHour(for: now)

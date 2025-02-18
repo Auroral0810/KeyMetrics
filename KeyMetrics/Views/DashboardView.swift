@@ -130,11 +130,25 @@ struct StatCardView: View {
         .cornerRadius(16)
     }
 }
-
 // 改进的速度计视图 - 更紧凑的布局
 struct SpeedMeterView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let currentSpeed: Double
+    
+    // 根据速度计算颜色
+    private func getSpeedColor() -> Color {
+        let normalizedSpeed = min(currentSpeed / 300.0, 1.0)
+        
+        // 使用 HSB 颜色模型实现平滑渐变
+        // hue: 从绿色(120°)到红色(0°)
+        let hue = 0.4 * (1.0 - normalizedSpeed)
+        // saturation: 保持饱和度在0.6-1.0之间动态变化
+        let saturation = 0.6 + (0.4 * normalizedSpeed)
+        // brightness: 保持亮度在0.7-1.0之间动态变化
+        let brightness = 0.7 + (0.3 * normalizedSpeed)
+        
+        return Color(hue: hue, saturation: saturation, brightness: brightness)
+    }
     
     var body: some View {
         VStack(spacing: 8) {
@@ -152,18 +166,20 @@ struct SpeedMeterView: View {
                 Circle()
                     .trim(from: 0, to: min(currentSpeed / 300.0, 1.0))
                     .stroke(
-                        ThemeManager.ThemeColors.chartColors[0],
+                        getSpeedColor(),
                         style: StrokeStyle(
                             lineWidth: 12,
                             lineCap: .round
                         )
                     )
                     .rotationEffect(.degrees(-90))
+                    .animation(.easeInOut(duration: 0.3), value: currentSpeed)
                 
                 VStack(spacing: 4) {
                     Text("\(Int(currentSpeed))")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .foregroundColor(getSpeedColor())
+                        .animation(.easeInOut(duration: 0.3), value: currentSpeed)
                     Text("次/分钟")
                         .font(.caption)
                         .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))

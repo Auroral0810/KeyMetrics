@@ -235,9 +235,13 @@ struct DayDetailView: View {
                 HStack {
                     Text(formatDate(date))
                         .font(.headline)
+                        .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     Spacer()
-                    Button("关闭") {
+                    Button(action: {
                         dismiss()
+                    }) {
+                        Text("关闭")
+                            .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     }
                 }
                 .padding(.horizontal)
@@ -265,6 +269,7 @@ struct DayDetailView: View {
                     VStack(alignment: .leading) {
                         Text("按键分布")
                             .font(.headline)
+                            .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -273,9 +278,10 @@ struct DayDetailView: View {
                                     VStack(alignment: .center) {
                                         Text(item.key)
                                             .font(.system(.body, design: .monospaced))
+                                            .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                                         Text("\(item.count)")
                                             .font(.caption)
-                                            .foregroundColor(.gray)
+                                            .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                                     }
                                     .padding(8)
                                     .background(Color.gray.opacity(0.1))
@@ -290,6 +296,7 @@ struct DayDetailView: View {
                     VStack(alignment: .leading) {
                         Text("使用趋势")
                             .font(.headline)
+                            .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                             .padding(.horizontal)
                         
                         let chart = Chart {
@@ -357,6 +364,7 @@ struct DayDetailView: View {
             .padding(.vertical)
         }
         .frame(width: 600, height: 500)
+        .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
     }
     
     private func formatDate(_ date: Date) -> String {
@@ -374,40 +382,19 @@ struct DayDetailView: View {
     }
     
     private func getUniqueKeysCount() -> Int {
-        let startOfDay = Calendar.current.startOfDay(for: date)
-        
-        // 获取当天的按键统计
-        if let dayStats = keyStats.dailyStats[startOfDay] {
-            // 获取当天有使用记录的不同按键数量
-            let uniqueKeys = Set(keyStats.keyFrequency.keys.filter { keyCode in
-                keyStats.keyFrequency[keyCode] ?? 0 > 0
-            })
-            return uniqueKeys.count
+        if let dailyDetail = keyStats.getDailyDetail(for: date) {
+            return dailyDetail.uniqueKeysCount
         }
         return 0
     }
     
     private func getKeyDistribution() -> [(key: String, count: Int)] {
-        let startOfDay = Calendar.current.startOfDay(for: date)
-        
-        // 获取当天的按键统计
-        if let dayStats = keyStats.dailyStats[startOfDay] {
-            // 创建临时数组来存储结果
-            var distribution: [(key: String, count: Int)] = []
-            
-            // 遍历所有按键
-            for (keyCode, totalCount) in keyStats.keyFrequency {
-                if totalCount > 0 {
-                    let keyName = keyMap[keyCode] ?? "Key \(keyCode)"
-                    distribution.append((key: keyName, count: totalCount))
-                }
+        if let dailyDetail = keyStats.getDailyDetail(for: date) {
+            return dailyDetail.topTenKeys.map { keyCount in
+                let keyName = keyMap[keyCount.keyCode] ?? "Key \(keyCount.keyCode)"
+                return (key: keyName, count: keyCount.count)
             }
-            
-            // 排序并获取前10个
-            let sortedDistribution = distribution.sorted { $0.count > $1.count }
-            return Array(sortedDistribution.prefix(10))
         }
-        
         return []
     }
 } 

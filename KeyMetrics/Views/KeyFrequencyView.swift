@@ -505,7 +505,7 @@ struct BarChart: View {
     }
 }
 
-// 趋势图组件
+// 折线图组件
 struct LineChart: View {
     @EnvironmentObject var themeManager: ThemeManager
     let data: ArraySlice<(key: String, count: Int)>
@@ -535,7 +535,7 @@ struct LineChart: View {
                     x: .value("Key", item.key),
                     y: .value("Count", item.count)
                 )
-                .foregroundStyle(by: .value("Key", item.key))
+                .foregroundStyle(chartColors[index])
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.linear)
                 
@@ -543,7 +543,7 @@ struct LineChart: View {
                     x: .value("Key", item.key),
                     y: .value("Count", item.count)
                 )
-                .foregroundStyle(by: .value("Key", item.key))
+                .foregroundStyle(chartColors[index])
                 .symbolSize(60)
                 .annotation(position: .top) {
                     Text("\(item.count)")
@@ -559,7 +559,6 @@ struct LineChart: View {
         let textColor = ThemeManager.ThemeColors.text(themeManager.isDarkMode)
         
         chart
-            .chartForegroundStyleScale(range: chartColors)
             .chartLegend(position: .bottom, alignment: .center, spacing: 12) {
                 HStack(spacing: 8) {
                     ForEach(getLegendItems()) { item in
