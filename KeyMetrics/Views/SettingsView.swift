@@ -22,6 +22,7 @@ struct SettingsView: View {
     @State private var selectedTimeRange: TimeRange = .day
     @State private var isExporting = false
     @State private var showExportSheet = false
+    @StateObject private var backupManager = BackupManager.shared
     
     private let languages: [String] = LanguageType.allCases.map { $0.displayName }
     var fonts: [String] {
@@ -126,7 +127,7 @@ struct SettingsView: View {
                                 .foregroundColor(ThemeManager.ThemeColors.secondaryText(themeManager.isDarkMode))
                             
                             HStack(spacing: 20) {
-                                Picker(languageManager.localizedString("Interval"), selection: $backupInterval) {
+                                Picker(languageManager.localizedString("Interval"), selection: $backupManager.backupInterval) {
                                     Text(languageManager.localizedString("Daily")).tag(1)
                                     Text(languageManager.localizedString("Every 3 Days")).tag(3)
                                     Text(languageManager.localizedString("Weekly")).tag(7)
@@ -135,8 +136,17 @@ struct SettingsView: View {
                                 .frame(maxWidth: .infinity)
                                 .colorMultiply(themeManager.isDarkMode ? .white : .black)
                                 
-                                Toggle("", isOn: $showNotification)
-                                    .labelsHidden()
+                                Toggle("", isOn: Binding(
+                                    get: { backupManager.isBackupEnabled },
+                                    set: { newValue in
+                                        backupManager.isBackupEnabled = newValue
+                                        if newValue {
+                                            // 立即执行一次备份
+                                            backupManager.performBackup()
+                                        }
+                                    }
+                                ))
+                                .labelsHidden()
                             }
                         }
                         
@@ -152,14 +162,6 @@ struct SettingsView: View {
                             }
                             
                             DataButton(
-                                title: languageManager.localizedString("Import Data"),
-                                icon: "square.and.arrow.down.fill",
-                                color: .green
-                            ) {
-                                // TODO: 实现导入逻辑
-                            }
-                            
-                            DataButton(
                                 title: languageManager.localizedString("Clear Data"),
                                 icon: "trash.fill",
                                 color: .red
@@ -168,7 +170,6 @@ struct SettingsView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 12)
                 }
                 .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                 
