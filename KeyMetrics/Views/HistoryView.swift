@@ -97,9 +97,42 @@ struct HistoryView: View {
 }
 
 struct DayDetailView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let date: Date
     let keyStats: KeyStats
     @Environment(\.dismiss) private var dismiss
+    
+    // 预定义颜色数组
+    private let chartColors: [Color] = [
+        .blue,      // 主要的蓝色
+        .green,     // 鲜艳的绿色
+        .orange,    // 橙色
+        .purple,    // 紫色
+        .red,       // 红色
+        .cyan,      // 青色
+        .yellow,    // 黄色
+        .indigo,    // 靛蓝色
+        .mint,      // 薄荷绿
+        .pink,      // 粉色
+        .gray       // 其他类别使用的灰色
+    ]
+    
+    // 为图例创建数据模型
+    private struct ChartLegend: Identifiable {
+        let id = UUID()
+        let key: String
+        let color: Color
+    }
+    
+    // 获取图例数据
+    private func getLegendItems() -> [ChartLegend] {
+        return getKeyDistribution().enumerated().map { index, item in
+            ChartLegend(
+                key: item.key,
+                color: chartColors[index % chartColors.count]
+            )
+        }
+    }
     
     // 获取按键名称的映射
     private let keyMap: [Int: String] = [
@@ -259,17 +292,60 @@ struct DayDetailView: View {
                             .font(.headline)
                             .padding(.horizontal)
                         
-                        Chart {
+                        let chart = Chart {
                             ForEach(getKeyDistribution(), id: \.key) { item in
                                 BarMark(
                                     x: .value("Key", item.key),
                                     y: .value("Count", item.count)
                                 )
                                 .foregroundStyle(by: .value("Key", item.key))
+                                .cornerRadius(8)
                             }
                         }
-                        .frame(height: 200)
-                        .padding()
+                        
+                        let textColor = ThemeManager.ThemeColors.text(themeManager.isDarkMode)
+                        
+                        chart
+                            .chartForegroundStyleScale(range: chartColors)
+                            .chartLegend(position: .bottom, alignment: .center, spacing: 12) {
+                                HStack(spacing: 8) {
+                                    ForEach(getLegendItems()) { item in
+                                        Label(
+                                            title: { 
+                                                Text(item.key)
+                                                    .font(.caption)
+                                                    .foregroundStyle(textColor)
+                                            },
+                                            icon: {
+                                                Circle()
+                                                    .fill(item.color)
+                                                    .frame(width: 8, height: 8)
+                                            }
+                                        )
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            .chartXAxis {
+                                AxisMarks { value in
+                                    AxisGridLine()
+                                        .foregroundStyle(textColor.opacity(0.1))
+                                    AxisValueLabel()
+                                        .foregroundStyle(textColor)
+                                        .font(.system(size: 10, weight: .medium))
+                                }
+                            }
+                            .chartYAxis {
+                                AxisMarks { value in
+                                    AxisGridLine()
+                                        .foregroundStyle(textColor.opacity(0.1))
+                                    AxisValueLabel()
+                                        .foregroundStyle(textColor)
+                                        .font(.system(size: 10, weight: .medium))
+                                }
+                            }
+                            .frame(height: 200)
+                            .padding()
                     }
                 } else {
                     Text("这一天没有按键记录")
@@ -299,23 +375,39 @@ struct DayDetailView: View {
     
     private func getUniqueKeysCount() -> Int {
         let startOfDay = Calendar.current.startOfDay(for: date)
-        // 只统计当天的独特按键数量
-        let dayKeys = keyStats.keyFrequency.filter { key, _ in
-            // 这里需要添加日期过滤逻辑
-            true // 暂时返回所有，需要修改 KeyStats 结构来支持按日期过滤
+        
+        // 获取当天的按键统计
+        if let dayStats = keyStats.dailyStats[startOfDay] {
+            // 获取当天有使用记录的不同按键数量
+            let uniqueKeys = Set(keyStats.keyFrequency.keys.filter { keyCode in
+                keyStats.keyFrequency[keyCode] ?? 0 > 0
+            })
+            return uniqueKeys.count
         }
-        return dayKeys.count
+        return 0
     }
     
     private func getKeyDistribution() -> [(key: String, count: Int)] {
         let startOfDay = Calendar.current.startOfDay(for: date)
-        // 转换按键码为可读名称
-        return keyStats.keyFrequency
-            .map { keyCode, count in
-                (key: keyMap[keyCode] ?? "Key \(keyCode)", count: count)
+        
+        // 获取当天的按键统计
+        if let dayStats = keyStats.dailyStats[startOfDay] {
+            // 创建临时数组来存储结果
+            var distribution: [(key: String, count: Int)] = []
+            
+            // 遍历所有按键
+            for (keyCode, totalCount) in keyStats.keyFrequency {
+                if totalCount > 0 {
+                    let keyName = keyMap[keyCode] ?? "Key \(keyCode)"
+                    distribution.append((key: keyName, count: totalCount))
+                }
             }
-            .sorted { $0.count > $1.count }
-            .prefix(10)
-            .map { $0 }
+            
+            // 排序并获取前10个
+            let sortedDistribution = distribution.sorted { $0.count > $1.count }
+            return Array(sortedDistribution.prefix(10))
+        }
+        
+        return []
     }
 } 

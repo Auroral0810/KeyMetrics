@@ -29,7 +29,7 @@ struct KeyFrequencyView: View {
     enum ChartType: String, CaseIterable {
         case donut = "环形图"
         case bar = "柱状图"
-        case line = "趋势图"
+        case line = "折线图"
     }
     
     var sortedKeyFrequency: [(key: String, count: Int)] {
@@ -280,12 +280,44 @@ struct RankingRow: View {
     }
 }
 
+// 所有图表共用的颜色数组
+private let chartColors: [Color] = [
+    .blue,      // 主要的蓝色
+    .green,     // 鲜艳的绿色
+    .orange,    // 橙色
+    .purple,    // 紫色
+    .red,       // 红色
+    .cyan,      // 青色
+    .yellow,    // 黄色
+    .indigo,    // 靛蓝色
+    .mint,      // 薄荷绿
+    .pink,      // 粉色
+    .gray       // 其他类别使用的灰色
+]
+
 // 环形图组件
 struct DonutChart: View {
     @EnvironmentObject var themeManager: ThemeManager
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     private let totalKeyCount: Int
+    
+    // 为图例创建数据模型
+    struct ChartLegend: Identifiable {
+        let id = UUID()
+        let key: String
+        let color: Color
+    }
+    
+    // 获取图例数据
+    func getLegendItems() -> [ChartLegend] {
+        return chartData.enumerated().map { index, item in
+            ChartLegend(
+                key: item.key,
+                color: item.key == "其他" ? chartColors.last! : chartColors[index]
+            )
+        }
+    }
     
     private var chartData: [(key: String, count: Int)] {
         let top10Data = Array(data)
@@ -311,7 +343,7 @@ struct DonutChart: View {
     }
     
     var body: some View {
-        Chart {
+        let chart = Chart {
             ForEach(chartData, id: \.key) { item in
                 SectorMark(
                     angle: .value("Count", item.count),
@@ -342,9 +374,31 @@ struct DonutChart: View {
                 }
             }
         }
-        .chartLegend(position: .bottom, alignment: .center, spacing: 10)
-        .foregroundStyle(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
-        .frame(height: 300)
+        
+        let textColor = ThemeManager.ThemeColors.text(themeManager.isDarkMode)
+        
+        chart
+            .chartForegroundStyleScale(range: chartColors)
+            .chartLegend(position: .bottom, alignment: .center, spacing: 12) {
+                HStack(spacing: 8) {
+                    ForEach(getLegendItems()) { item in
+                        Label(
+                            title: { 
+                                Text(item.key)
+                                    .font(.caption)
+                                    .foregroundStyle(textColor)
+                            },
+                            icon: {
+                                Circle()
+                                    .fill(item.color)
+                                    .frame(width: 8, height: 8)
+                            }
+                        )
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .frame(height: 300)
     }
 }
 
@@ -354,20 +408,100 @@ struct BarChart: View {
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
+    // 为图例创建数据模型
+    private struct ChartLegend: Identifiable {
+        let id = UUID()
+        let key: String
+        let color: Color
+    }
+    
+    // 获取图例数据，确保颜色与柱状图对应
+    private func getLegendItems() -> [ChartLegend] {
+        return Array(data.enumerated()).map { index, item in
+            ChartLegend(
+                key: item.key,
+                color: chartColors[index]
+            )
+        }
+    }
+    
     var body: some View {
-        Chart {
+        let chart = Chart {
             ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
                 BarMark(
                     x: .value("Key", item.key),
                     y: .value("Count", item.count)
                 )
                 .foregroundStyle(by: .value("Key", item.key))
+                .cornerRadius(8)
                 .opacity(hoveredKey == nil || hoveredKey == item.key ? 1 : 0.3)
+                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 2)
+                .annotation(position: .top, alignment: .center, spacing: 4) {
+                    if hoveredKey == item.key {
+                        VStack(spacing: 2) {
+                            Text("\(item.count)次")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                            Text(item.key)
+                                .font(.system(size: 10))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.black.opacity(0.8))
+                        )
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                }
             }
         }
-        .chartLegend(position: .bottom, alignment: .center, spacing: 10)
-        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
-        .frame(height: 300)
+        
+        let textColor = ThemeManager.ThemeColors.text(themeManager.isDarkMode)
+        
+        chart
+            .chartForegroundStyleScale(range: chartColors)
+            .chartLegend(position: .bottom, alignment: .center, spacing: 12) {
+                HStack(spacing: 8) {
+                    ForEach(getLegendItems()) { item in
+                        Label(
+                            title: { 
+                                Text(item.key)
+                                    .font(.caption)
+                                    .foregroundStyle(textColor)
+                            },
+                            icon: {
+                                Circle()
+                                    .fill(item.color)
+                                    .frame(width: 8, height: 8)
+                            }
+                        )
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisGridLine()
+                        .foregroundStyle(textColor.opacity(0.1))
+                    AxisValueLabel()
+                        .foregroundStyle(textColor)
+                        .font(.system(size: 10, weight: .medium))
+                }
+            }
+            .chartYAxis {
+                AxisMarks { value in
+                    AxisGridLine()
+                        .foregroundStyle(textColor.opacity(0.1))
+                    AxisValueLabel()
+                        .foregroundStyle(textColor)
+                        .font(.system(size: 10, weight: .medium))
+                }
+            }
+            .frame(height: 300)
+            .padding(.top, 20)
+            .animation(.easeInOut, value: hoveredKey)
     }
 }
 
@@ -377,52 +511,87 @@ struct LineChart: View {
     let data: ArraySlice<(key: String, count: Int)>
     @Binding var hoveredKey: String?
     
+    // 为图例创建数据模型
+    private struct ChartLegend: Identifiable {
+        let id = UUID()
+        let key: String
+        let color: Color
+    }
+    
+    // 获取图例数据
+    private func getLegendItems() -> [ChartLegend] {
+        return Array(data.enumerated()).map { index, item in
+            ChartLegend(
+                key: item.key,
+                color: chartColors[index]
+            )
+        }
+    }
+    
     var body: some View {
-        Chart {
+        let chart = Chart {
             ForEach(Array(data.enumerated()), id: \.element.key) { index, item in
-                // 添加线条
                 LineMark(
-                    x: .value("Index", index),
+                    x: .value("Key", item.key),
                     y: .value("Count", item.count)
                 )
                 .foregroundStyle(by: .value("Key", item.key))
                 .lineStyle(StrokeStyle(lineWidth: 2))
-                .interpolationMethod(.catmullRom) // 使用 catmullRom 插值方法
+                .interpolationMethod(.linear)
                 
-                // 添加点
                 PointMark(
-                    x: .value("Index", index),
+                    x: .value("Key", item.key),
                     y: .value("Count", item.count)
                 )
                 .foregroundStyle(by: .value("Key", item.key))
-                .symbolSize(30)
-                
-                // 添加数值标签
-                if hoveredKey == item.key {
-                    PointMark(
-                        x: .value("Index", index),
-                        y: .value("Count", item.count)
-                    )
-                    .foregroundStyle(by: .value("Key", item.key))
-                    .annotation {
-                        Text("\(item.count)")
-                            .font(.caption)
-                            .padding(4)
-                            .background(.background.opacity(0.9))
-                            .cornerRadius(4)
-                    }
+                .symbolSize(60)
+                .annotation(position: .top) {
+                    Text("\(item.count)")
+                        .font(.system(size: 12))
+                        .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
+                        .padding(4)
+                        .background(Color.black.opacity(0.1))
+                        .cornerRadius(4)
                 }
             }
         }
-        .chartLegend(position: .bottom, alignment: .center, spacing: 10)
-        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
-        .frame(height: 300)
-        .chartYAxis {
-            AxisMarks(position: .leading)
-        }
-        .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: data.count))
-        }
+        
+        let textColor = ThemeManager.ThemeColors.text(themeManager.isDarkMode)
+        
+        chart
+            .chartForegroundStyleScale(range: chartColors)
+            .chartLegend(position: .bottom, alignment: .center, spacing: 12) {
+                HStack(spacing: 8) {
+                    ForEach(getLegendItems()) { item in
+                        Label(
+                            title: { 
+                                Text(item.key)
+                                    .font(.caption)
+                                    .foregroundStyle(textColor)
+                            },
+                            icon: {
+                                Circle()
+                                    .fill(item.color)
+                                    .frame(width: 8, height: 8)
+                            }
+                        )
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisGridLine().foregroundStyle(textColor)
+                    AxisValueLabel().foregroundStyle(textColor)
+                }
+            }
+            .chartYAxis {
+                AxisMarks { value in
+                    AxisGridLine().foregroundStyle(textColor)
+                    AxisValueLabel().foregroundStyle(textColor)
+                }
+            }
+            .frame(height: 300)
     }
 }
 
