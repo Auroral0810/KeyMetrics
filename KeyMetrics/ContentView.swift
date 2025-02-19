@@ -15,6 +15,7 @@ struct ContentView: View {
     @EnvironmentObject var keyboardMonitor: KeyboardMonitor
     @EnvironmentObject var languageManager: LanguageManager
     @EnvironmentObject var fontManager: FontManager
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedTab = 0
     @State private var needsRefresh = false
 
@@ -71,7 +72,6 @@ struct ContentView: View {
             }
             .id("\(fontManager.currentFont)_\(needsRefresh)")
             .onChange(of: selectedTab) { newValue in
-                // 发送标签切换通知
                 NotificationCenter.default.post(
                     name: Notification.Name("tabChanged"),
                     object: nil,
@@ -87,6 +87,20 @@ struct ContentView: View {
                 if let window = NSApplication.shared.windows.first {
                     window.contentView?.needsDisplay = true
                 }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("changeTheme"))) { notification in
+            if selectedTab != 3 {
+                if let isDarkMode = notification.userInfo?["isDarkMode"] as? Bool {
+                    themeManager.isDarkMode = isDarkMode
+                    UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
+                }
+                if let theme = notification.userInfo?["theme"] as? String {
+                    themeManager.currentTheme = theme
+                    UserDefaults.standard.set(theme, forKey: "currentTheme")
+                }
+                themeManager.applyTheme()
+                needsRefresh.toggle()
             }
         }
         .onAppear {
