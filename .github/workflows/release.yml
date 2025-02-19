@@ -1,0 +1,32 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+          
+      - name: Build
+        run: |
+          xcodebuild archive -scheme KeyMetrics -archivePath KeyMetrics.xcarchive
+          xcodebuild -exportArchive -archivePath KeyMetrics.xcarchive -exportPath ./release -exportOptionsPlist exportOptions.plist
+          cd release
+          zip -r KeyMetrics.zip KeyMetrics.app
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./release/KeyMetrics.zip
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
