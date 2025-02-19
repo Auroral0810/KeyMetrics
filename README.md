@@ -1,7 +1,5 @@
 <div align="center">
-    <div style="font-family: 'Brush Script MT', cursive; font-size: 72px; background: linear-gradient(45deg, #FF6B6B, #4ECDC4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
-        ⌨️ KeyMetrics
-    </div>
+  <img src="github-header-image.png" alt="banner">
 
   [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=20&duration=3000&pause=1000&color=3498DB&center=true&vCenter=true&width=500&lines=优雅而强大的键盘输入分析工具;Elegant+Keyboard+Analytics+Tool;键入每一个字符，记录每一次进步;Type+every+char%2C+track+every+progress;让打字成为一种艺术;Make+typing+an+art)](https://git.io/typing-svg)
 
@@ -34,6 +32,7 @@ KeyMetrics 为您带来身临其境的数据可视化体验。通过精心设计
 
 ### 🌏 全球化视野
 KeyMetrics 突破语言藩篱，为全球用户提供无障碍的使用体验。我们支持简体中文、繁体中文、English、日本語和한국어等多种语言，让来自世界各地的用户都能便捷地使用每一项功能。在这里，科技与人文完美融合，打造真正的全球化应用。
+
 
 ## 🖼 界面展示
 
