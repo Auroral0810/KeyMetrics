@@ -19,6 +19,13 @@
   </p>
 </div>
 
+## 🎬 功能演示
+
+<div align="center">
+  <img src="Resources/demo.gif" alt="功能演示" width="800">
+  <p><em>KeyMetrics 实际使用效果展示</em></p>
+</div>
+
 ## ✨ 核心特性
 
 ### 🎨 实时数据可视化
