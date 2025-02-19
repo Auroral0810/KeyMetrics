@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="github-header-image.png" alt="banner">
+  <img src="Resources/github-header-image.png" alt="banner">
 
   [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=20&duration=3000&pause=1000&color=3498DB&center=true&vCenter=true&width=500&lines=优雅而强大的键盘输入分析工具;Elegant+Keyboard+Analytics+Tool;键入每一个字符，记录每一次进步;Type+every+char%2C+track+every+progress;让打字成为一种艺术;Make+typing+an+art)](https://git.io/typing-svg)
 
