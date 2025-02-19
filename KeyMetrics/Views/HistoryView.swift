@@ -10,6 +10,8 @@ struct HistoryView: View {
     @State private var selectedDate: Date? = nil
     @State private var showingDateDetail = false
     @State private var needsRefresh = false
+    @State private var historyData: [(date: Date, count: Int)] = []
+    @State private var isCurrentTab = false
     
     enum TimeRange: String, CaseIterable {
         case day
@@ -44,45 +46,47 @@ struct HistoryView: View {
             .colorMultiply(themeManager.isDarkMode ? .white : .black)
             .padding()
             
-            Chart {
-                ForEach(getHistoryData(), id: \.date) { data in
-                    LineMark(
-                        x: .value(languageManager.localizedString("Date"), data.date, unit: .day),
-                        y: .value(languageManager.localizedString("Count"), data.count)
-                    )
-                    
-                    AreaMark(
-                        x: .value(languageManager.localizedString("Date"), data.date, unit: .day),
-                        y: .value(languageManager.localizedString("Count"), data.count)
-                    )
-                    .opacity(0.1)
+            if isCurrentTab {
+                Chart {
+                    ForEach(historyData, id: \.date) { data in
+                        LineMark(
+                            x: .value(languageManager.localizedString("Date"), data.date, unit: .day),
+                            y: .value(languageManager.localizedString("Count"), data.count)
+                        )
+                        
+                        AreaMark(
+                            x: .value(languageManager.localizedString("Date"), data.date, unit: .day),
+                            y: .value(languageManager.localizedString("Count"), data.count)
+                        )
+                        .opacity(0.1)
+                    }
                 }
-            }
-            .chartXAxis {
-                AxisMarks { value in
-                    AxisGridLine()
-                    if let date = value.as(Date.self) {
+                .chartXAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                        if let date = value.as(Date.self) {
+                            AxisValueLabel {
+                                Text(formatShortDate(date))
+                                    .font(fontManager.getFont(size: 10))
+                            }
+                        }
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
                         AxisValueLabel {
-                            Text(formatShortDate(date))
+                            Text("\(value.index)")
                                 .font(fontManager.getFont(size: 10))
                         }
                     }
                 }
+                .frame(height: 300)
+                .padding()
             }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine()
-                    AxisValueLabel {
-                        Text("\(value.index)")
-                            .font(fontManager.getFont(size: 10))
-                    }
-                }
-            }
-            .frame(height: 300)
-            .padding()
             
             List {
-                ForEach(getHistoryData().reversed(), id: \.date) { data in
+                ForEach(historyData.reversed(), id: \.date) { data in
                     HStack {
                         Text(formatDate(data.date))
                             .font(fontManager.getFont(size: 14))
@@ -110,9 +114,38 @@ struct HistoryView: View {
             }
         }
         .id(needsRefresh)
+        .onAppear {
+            NotificationCenter.default.addObserver(
+                forName: Notification.Name("tabChanged"),
+                object: nil,
+                queue: .main
+            ) { notification in
+                if let selectedTab = notification.userInfo?["selectedTab"] as? Int {
+                    isCurrentTab = selectedTab == 2
+                    if isCurrentTab {
+                        updateHistoryData()
+                    }
+                }
+            }
+            
+            isCurrentTab = true
+            updateHistoryData()
+        }
+        .onDisappear {
+            isCurrentTab = false
+        }
+        .onChange(of: selectedTimeRange) { _ in
+            if isCurrentTab {
+                updateHistoryData()
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
             needsRefresh.toggle()
         }
+    }
+    
+    private func updateHistoryData() {
+        historyData = getHistoryData()
     }
     
     private func getHistoryData() -> [(date: Date, count: Int)] {

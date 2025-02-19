@@ -10,7 +10,7 @@ class KeyboardMonitor: ObservableObject {
     
     private var eventTap: CFMachPort?
     private let statsQueue = DispatchQueue(label: "com.keymetrics.stats")
-    private let saveInterval: TimeInterval = 60 // 每60秒保存一次数据
+    private let saveInterval: TimeInterval = 300 // 每60秒保存一次数据
     private var lastEventTime: TimeInterval = 0
     private let minimumTimeBetweenEvents: TimeInterval = 0.05 // 50毫秒
     

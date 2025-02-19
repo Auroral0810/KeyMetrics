@@ -11,6 +11,8 @@ struct KeyFrequencyView: View {
     @State private var showingExportSheet = false
     @State private var hoveredKey: String? = nil
     @State private var selectedChartType: ChartType = .donut
+    @State private var shouldUpdateCharts = false
+    @State private var chartData: [(key: String, count: Int)] = []
     
     enum TimeRange: String, CaseIterable {
         case day = "Last 24 Hours"
@@ -88,6 +90,23 @@ struct KeyFrequencyView: View {
         )
     }
     
+    private func loadChartData() {
+        // 从文件加载最新数据
+        keyboardMonitor.loadStats()
+        
+        // 处理数据并更新图表
+        let sortedData = keyboardMonitor.keyStats.keyFrequency.sorted { $0.value > $1.value }
+        let top9 = sortedData.prefix(9)
+        let othersCount = sortedData.dropFirst(9).reduce(0) { $0 + $1.value }
+        
+        var newChartData = top9.map { (keyboardMonitor.getKeyName(for: $0.key), $0.value) }
+        if othersCount > 0 {
+            newChartData.append((languageManager.localizedString("Others"), othersCount))
+        }
+        
+        chartData = newChartData
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
             // 顶部控制栏
@@ -151,17 +170,19 @@ struct KeyFrequencyView: View {
                 
                 // 主图表区域
                 VStack {
-                    switch selectedChartType {
-                    case .donut:
-                        DonutChart(
-                            data: sortedKeyFrequency.prefix(10),
-                            hoveredKey: $hoveredKey,
-                            totalKeyCount: sortedKeyFrequency.reduce(0) { $0 + $1.count }
-                        )
-                    case .bar:
-                        BarChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
-                    case .line:
-                        LineChart(data: sortedKeyFrequency.prefix(10), hoveredKey: $hoveredKey)
+                    if shouldUpdateCharts {
+                        switch selectedChartType {
+                        case .donut:
+                            DonutChart(
+                                data: chartData.prefix(10),
+                                hoveredKey: $hoveredKey,
+                                totalKeyCount: chartData.reduce(0) { $0 + $1.count }
+                            )
+                        case .bar:
+                            BarChart(data: chartData.prefix(10), hoveredKey: $hoveredKey)
+                        case .line:
+                            LineChart(data: chartData.prefix(10), hoveredKey: $hoveredKey)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -173,7 +194,7 @@ struct KeyFrequencyView: View {
                         .foregroundColor(ThemeManager.ThemeColors.text(themeManager.isDarkMode))
                     
                     // 获取实际的按键数据
-                    let actualData = sortedKeyFrequency.prefix(10)
+                    let actualData = chartData.prefix(10)
                     // 计算需要填充的占位符数量
                     let placeholderCount = 10 - actualData.count
                     
@@ -183,7 +204,7 @@ struct KeyFrequencyView: View {
                             rank: index + 1,
                             key: item.key,
                             count: item.count,
-                            total: sortedKeyFrequency.first?.count ?? 1,
+                            total: chartData.first?.count ?? 1,
                             isHovered: hoveredKey == item.key
                         )
                         .onHover { isHovered in
@@ -197,7 +218,7 @@ struct KeyFrequencyView: View {
                             rank: actualData.count + index + 1,
                             key: "-",
                             count: 0,
-                            total: sortedKeyFrequency.first?.count ?? 1,
+                            total: chartData.first?.count ?? 1,
                             isHovered: false
                         )
                         .opacity(0.3)  // 降低占位符的透明度
@@ -210,6 +231,33 @@ struct KeyFrequencyView: View {
         .background(ThemeManager.ThemeColors.background(themeManager.isDarkMode))
         .sheet(isPresented: $showingExportSheet) {
             ExportView()
+        }
+        .onAppear {
+            // 视图出现时加载数据
+            loadChartData()
+            shouldUpdateCharts = true
+        }
+        .onDisappear {
+            // 视图消失时停止更新
+            shouldUpdateCharts = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("tabChanged"))) { notification in
+            if let selectedTab = notification.userInfo?["selectedTab"] as? Int {
+                // 只有在按键分析标签(1)时才启用图表更新
+                if selectedTab == 1 {
+                    loadChartData()
+                    shouldUpdateCharts = true
+                } else {
+                    shouldUpdateCharts = false
+                }
+            }
+        }
+        // 添加图表类型切换的监听
+        .onChange(of: selectedChartType) { _ in
+            // 切换图表类型时重新加载数据
+            if shouldUpdateCharts {
+                loadChartData()
+            }
         }
     }
 }
