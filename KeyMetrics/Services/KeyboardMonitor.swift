@@ -6,6 +6,7 @@ class KeyboardMonitor: ObservableObject {
     @Published var isMonitoring = false
     @Published var latestKeyStroke: KeyStroke?
     @Published var currentSpeed: Int = 0 // 确保这个属性是 @Published
+    @Published var shouldCalculateSpeed = false
     
     private var eventTap: CFMachPort?
     private let statsQueue = DispatchQueue(label: "com.keymetrics.stats")
@@ -48,18 +49,17 @@ class KeyboardMonitor: ObservableObject {
     }
     
     private func calculateCurrentSpeed() {
-        let oneMinuteAgo = Date().addingTimeInterval(-60)
-        // 只保留最近一分钟的按键记录
-        keyPressTimestamps = keyPressTimestamps.filter { $0 > oneMinuteAgo }
-        
-        // 当前速度就是最近一分钟内的按键数
-        let speed = keyPressTimestamps.count
-        
-        // 在主线程更新 UI
-        DispatchQueue.main.async {
-            self.currentSpeed = speed
-            self.objectWillChange.send() // 确保发送更新通知
+        // 只在需要计算速度时才执行
+        guard shouldCalculateSpeed else {
+            currentSpeed = 0
+            return
         }
+        
+        let now = Date()
+        // 移除超过60秒的时间戳
+        keyPressTimestamps = keyPressTimestamps.filter { now.timeIntervalSince($0) <= 60 }
+        // 计算每分钟按键次数
+        currentSpeed = keyPressTimestamps.count
     }
     
     func checkAccessibilityPermissions() {
@@ -177,7 +177,10 @@ class KeyboardMonitor: ObservableObject {
             // 记录按键并更新统计
             DispatchQueue.main.async {
                 self.keyPressTimestamps.append(Date())
-                self.calculateCurrentSpeed()
+                // 只在需要计算速度时才计算
+                if self.shouldCalculateSpeed == true {
+                    self.calculateCurrentSpeed()
+                }
                 
                 let character = self.getKeyName(for: keyCode)
                 let keyStroke = KeyStroke(keyCode: keyCode, character: character)
@@ -218,7 +221,10 @@ class KeyboardMonitor: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.keyPressTimestamps.append(Date())
-                    self.calculateCurrentSpeed()
+                    // 只在需要计算速度时才计算
+                    if self.shouldCalculateSpeed == true {
+                        self.calculateCurrentSpeed()
+                    }
                     
                     let character = self.getKeyName(for: keyCode)
                     let keyStroke = KeyStroke(keyCode: keyCode, character: character)

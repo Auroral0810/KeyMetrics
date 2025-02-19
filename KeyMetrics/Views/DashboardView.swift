@@ -7,6 +7,7 @@ struct DashboardView: View {
     @EnvironmentObject var languageManager: LanguageManager
     @EnvironmentObject var fontManager: FontManager
     @State private var needsRefresh = false  // 添加刷新状态
+    @State private var showKeyBubble = false
     
     var body: some View {
         ScrollView {
@@ -35,11 +36,13 @@ struct DashboardView: View {
                     SpeedMeterView(currentSpeed: getCurrentTypingSpeed())
                         .frame(width: 140, height: 140)
                     
-                    KeyBubbleView(latestKeyStroke: keyboardMonitor.latestKeyStroke)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 140)
-                        .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
-                        .cornerRadius(16)
+                    if showKeyBubble {
+                        KeyBubbleView(latestKeyStroke: keyboardMonitor.latestKeyStroke)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 140)
+                            .background(ThemeManager.ThemeColors.cardBackground(themeManager.isDarkMode))
+                            .cornerRadius(16)
+                    }
                 }
                 
                 // 准确率统计
@@ -71,6 +74,29 @@ struct DashboardView: View {
         .id(needsRefresh)  // 添加 id 以触发视图刷新
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("fontChanged"))) { _ in
             needsRefresh.toggle()  // 收到通知时触发刷新
+        }
+        .onAppear {
+            // 视图出现时启用速度计算和气泡显示
+            keyboardMonitor.shouldCalculateSpeed = true
+            showKeyBubble = true
+            
+            // 添加标签切换通知观察者
+            NotificationCenter.default.addObserver(
+                forName: Notification.Name("tabChanged"),
+                object: nil,
+                queue: .main
+            ) { notification in
+                if let selectedTab = notification.userInfo?["selectedTab"] as? Int {
+                    // 只有在仪表盘标签(0)时才启用速度计算和气泡显示
+                    keyboardMonitor.shouldCalculateSpeed = selectedTab == 0
+                    showKeyBubble = selectedTab == 0
+                }
+            }
+        }
+        .onDisappear {
+            // 视图消失时禁用速度计算和气泡显示
+            keyboardMonitor.shouldCalculateSpeed = false
+            showKeyBubble = false
         }
     }
     

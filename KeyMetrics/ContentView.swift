@@ -70,6 +70,14 @@ struct ContentView: View {
                     .tag(4)
             }
             .id("\(fontManager.currentFont)_\(needsRefresh)")
+            .onChange(of: selectedTab) { newValue in
+                // 发送标签切换通知
+                NotificationCenter.default.post(
+                    name: Notification.Name("tabChanged"),
+                    object: nil,
+                    userInfo: ["selectedTab": newValue]
+                )
+            }
         }
         .padding()
         .frame(minWidth: 800, minHeight: 600)
