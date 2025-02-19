@@ -63,10 +63,14 @@ KeyMetrics 突破语言藩篱，为全球用户提供无障碍的使用体验。
 - 约 50MB 可用磁盘空间
 - 需要授予辅助功能权限
 
-### 安装步骤
-1. 从 [Releases](https://github.com/yourusername/KeyMetrics/releases) 下载最新版本
-2. 解压下载的 `KeyMetrics.zip` 文件
-3. 将 KeyMetrics.app 拖入应用程序文件夹
+### 下载安装
+你可以从以下位置下载最新版本：
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Auroral0810/KeyMetrics)](https://github.com/Auroral0810/KeyMetrics/releases/latest)
+
+1. 访问 [Releases](https://github.com/Auroral0810/KeyMetrics/releases/latest) 页面
+2. 下载最新版本的 `KeyMetrics.zip`
+3. 解压并将 `KeyMetrics.app` 拖入应用程序文件夹
 4. 首次运行时按照提示授予必要权限
 
 ### 快速上手
